@@ -21,7 +21,7 @@
 
 ## 빌드·설치
 
-Node 24.2+에서 `npm ci`, `npm run check`, `npm pack --pack-destination /absolute/output`을 실행합니다. `dist/`의 ESM JavaScript·타입 선언·CSS와 템플릿만 설치 파일에 포함합니다. 소비 프로젝트에서 `npm install /absolute/output/thedivineparadox-game-engine-0.1.0.tgz`로 설치합니다. npm registry 공개는 하지 않습니다. 소비자의 Node 요구사항이 더 높으면 그 요구사항을 따릅니다.
+Node 24.2+에서 `npm ci`, `npm run check`, `npm pack --pack-destination /absolute/output`을 실행합니다. `dist/`의 ESM JavaScript·타입 선언·CSS와 템플릿만 설치 파일에 포함합니다. 소비 프로젝트에서 `npm install /absolute/output/thedivineparadox-game-engine-0.2.0.tgz`로 설치합니다. npm registry 공개는 하지 않습니다. 소비자의 Node 요구사항이 더 높으면 그 요구사항을 따릅니다.
 
 엔진 변경은 버전을 올리고 새 설치 파일을 만든 뒤 소비 프로젝트의 lockfile과 함께 검토합니다. 기존 설치 파일을 같은 버전으로 교체하지 않습니다. `npm run check`는 runtime 회귀·공개 export·오프라인 별도 프로젝트 설치를 검사합니다. 현재 게임 5개의 실제 UI/CLI 호환성은 소비 프로젝트의 `npm run check`로 확인합니다.
 
@@ -71,3 +71,7 @@ Canvas2D는 제공하는 기본 표현 어댑터일 뿐입니다. core는 DOM �
 `browser/hold-input.ts`의 `createHoldInput()`은 터치/포인터와 Space를 하나의 누르기 동작으로 합칩니다. 마지막 입력을 뗄 때만 hold:false를 전달하고, 취소는 전체 동작을 중단하므로 뒤늦은 keyup이 성공으로 바뀌지 않습니다. 각 마운트에 별도 adapter를 만들고, 정지/재시작/종료는 host가 입력을 취소합니다. 생성 템플릿과 음료 게임이 같은 adapter를 사용합니다.
 
 치명적 host 오류는 소유 자원을 닫고 오류 안내와 다시 불러오기 버튼을 제공합니다. 버튼은 새 host와 입력/음향 scope를 만들며 페이지 전체나 계정 상태를 초기화하지 않습니다. 기록 한도에서 restart할 때는 core 기록 구간을 먼저 열고 남은 입력을 취소합니다.
+
+## 비주얼 제작 도구
+
+[픽셀·Imagegen·손그림 제작 흐름](docs/visual-production.md)을 따릅니다. `/tools/visual`은 기존 커널/Aseprite의 명시적 호출과 pixel binding, `/tools/media`는 재사용 이미지 export/등록·decode 검사입니다. native 생성·미술 결정은 에이전트가 담당합니다.
