@@ -1,0 +1,91 @@
+{
+  "name": "@thedivineparadox/game-engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Reusable deterministic mobile web game runtime and explicit authoring tools",
+  "files": [
+    "dist",
+    "templates",
+    "README.md"
+  ],
+  "exports": {
+    "./runtime": {
+      "types": "./dist/runtime/core/index.d.ts",
+      "import": "./dist/runtime/core/index.js",
+      "default": "./dist/runtime/core/index.js"
+    },
+    "./runtime/core": {
+      "types": "./dist/runtime/core/index.d.ts",
+      "import": "./dist/runtime/core/index.js",
+      "default": "./dist/runtime/core/index.js"
+    },
+    "./runtime/browser/host": {
+      "types": "./dist/runtime/browser/host.d.ts",
+      "import": "./dist/runtime/browser/host.js",
+      "default": "./dist/runtime/browser/host.js"
+    },
+    "./runtime/browser/assets": {
+      "types": "./dist/runtime/browser/assets.d.ts",
+      "import": "./dist/runtime/browser/assets.js",
+      "default": "./dist/runtime/browser/assets.js"
+    },
+    "./runtime/browser/audio": {
+      "types": "./dist/runtime/browser/audio.d.ts",
+      "import": "./dist/runtime/browser/audio.js",
+      "default": "./dist/runtime/browser/audio.js"
+    },
+    "./runtime/browser/hold-input": {
+      "types": "./dist/runtime/browser/hold-input.d.ts",
+      "import": "./dist/runtime/browser/hold-input.js",
+      "default": "./dist/runtime/browser/hold-input.js"
+    },
+    "./runtime/react": {
+      "types": "./dist/runtime/react/game-surface.d.ts",
+      "import": "./dist/runtime/react/game-surface.js",
+      "default": "./dist/runtime/react/game-surface.js"
+    },
+    "./tools": {
+      "types": "./dist/tools/game.d.ts",
+      "import": "./dist/tools/game.js",
+      "default": "./dist/tools/game.js"
+    },
+    "./runtime/react/styles.css": "./dist/runtime/react/game-surface.css",
+    "./package.json": "./package.json"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "engines": {
+    "node": ">=24.2.0"
+  },
+  "scripts": {
+    "build": "node scripts/build.ts",
+    "test": "node --test tests/runtime/*.test.ts tests/package.test.ts",
+    "check": "npm run build && npm test",
+    "prepack": "npm run build"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "vite": "^8.0.0",
+    "typescript": "^7.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "vite": {
+      "optional": true
+    },
+    "typescript": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@types/react": "19.3.0",
+    "react": "19.3.0",
+    "vite": "8.3.4",
+    "typescript": "7.0.2"
+  }
+}

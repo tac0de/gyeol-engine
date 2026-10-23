@@ -1,0 +1,11 @@
+import {spawnSync} from 'node:child_process';
+import {cpSync,mkdirSync,rmSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
+const root=fileURLToPath(new URL('../',import.meta.url));
+rmSync(new URL('../dist/',import.meta.url),{recursive:true,force:true});
+const compiler=fileURLToPath(new URL('./bin/tsc',import.meta.resolve('typescript/package.json')));
+const result=spawnSync(process.execPath,[compiler,'-p','tsconfig.json'],{cwd:root,stdio:'inherit'});
+if(result.error)throw result.error;
+if(result.status!==0)process.exit(result.status??1);
+mkdirSync(new URL('../dist/runtime/react/',import.meta.url),{recursive:true});
+cpSync(new URL('../runtime/react/game-surface.css',import.meta.url),new URL('../dist/runtime/react/game-surface.css',import.meta.url));
