@@ -16,7 +16,9 @@ test('existing native assembler/exporter validates and binds editable pixel sour
   const plan={version:1,id:'fixture',directory:'art/native-r1',output:'/assets/fixture/r1/hero',canvas:{width:8,height:8},pivot:{x:4,y:7},scale:1,columns:2,frames:[{id:'idle-0',image:'fixture.png',rect:{x:0,y:0,w:8,h:8},durationMs:100},{id:'idle-1',image:'fixture.png',rect:{x:8,y:0,w:8,h:8},durationMs:120}],clips:{idle:{from:'idle-0',to:'idle-1',loop:true,minDistinctFrames:2}}};
   fs.writeFileSync(path.join(root,'art/plan.json'),JSON.stringify(plan));
   const tools=createVisualTools({project:root,kernelBin:path.join(process.env.TDP_AGENT_KERNEL_ROOT??path.join(os.homedir(),'codex-agent-kernel'),'bin/agent'),authorityRef:'User-authorized visual tools verification; technical fixture, not adopted art'});
-  tools.pixel('assemble','art/plan.json');tools.pixel('export','art/plan.json');
+  const assembled=tools.pixel('assemble','art/plan.json');assert.equal(assembled.status,'assembled');assert.equal(assembled.source,fs.realpathSync(path.join(root,'art/native-r1/sprite.aseprite')));
+  const exported=tools.pixel('export','art/plan.json');assert.equal(exported.status,'exported');
+  const validated=tools.pixel('validate','art/plan.json');assert.equal(validated.status,'passed');
   const value=tools.bindPixel('art/plan.json','fixture','hero');
   assert.deepEqual(value.frames.map((f:any)=>f.durationMs),[100,120]);assert.equal(value.image,'/assets/fixture/r1/hero.png');
   const module=await import(pathToFileURL(path.join(root,'portal/games/fixture/pixel-hero.generated.ts')).href);

@@ -19,7 +19,8 @@ export function createVisualTools(options:VisualOptions){
   fs.writeFileSync(path.join(evidence,'stdout.json'),result.stdout??'');fs.writeFileSync(path.join(evidence,'stderr.log'),result.stderr??'');
   if(result.error||result.status!==0)throw Error(`Visual operation failed: ${operation}; evidence ${evidence}`,{cause:result.error});
   const response=JSON.parse(result.stdout);if(response.status!=='completed')throw Error(`Visual operation incomplete; evidence ${evidence}`);
-  return response.result.result;
+  if(!response.result||typeof response.result!=='object'||Array.isArray(response.result))throw Error(`Visual operation missing result; evidence ${evidence}`);
+  return response.result;
  }
  function media(action:MediaAction,inputs:Record<string,string>){
   const fields={prepare:'briefPath',synthesize:'recipePath',publish:'manifestPath',validate:'bundlePath'} as const;
