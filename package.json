@@ -1,6 +1,6 @@
 {
   "name": "@thedivineparadox/game-engine",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "description": "Reusable deterministic mobile web game runtime and explicit authoring tools",
@@ -72,7 +72,7 @@
   },
   "scripts": {
     "build": "node scripts/build.ts",
-    "test": "node --test tests/runtime/*.test.ts tests/package.test.ts tests/visual.test.ts",
+    "test": "node --test tests/runtime/*.test.ts tests/package.test.ts tests/visual.test.ts tests/reproduction.test.ts tests/experiments.test.ts",
     "check": "npm run build && npm test",
     "prepack": "npm run build",
     "test:visual-native": "node --test tests/visual-native.test.ts"

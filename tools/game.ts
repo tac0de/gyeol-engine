@@ -9,6 +9,10 @@ import {createRequire} from 'node:module';
 const packageRoot=fileURLToPath(new URL('../../',import.meta.url));
 import {copyJson,createSession,replay,type GameRules,type Json,type Command,type Recording} from '../runtime/core/index.ts';
 import {gameId,gameDirectory,readManifest,manifests} from './catalog.ts';
+export {collectIdentity,createReproduction,replayReproduction,compareReproductions,hashValue} from './reproduction.ts';
+export type {SourceIdentity,Reproduction} from './reproduction.ts';
+export {runExperiment} from './experiments.ts';
+export type {ExperimentPlan,ExperimentPolicy} from './experiments.ts';
 export {gameId,gameDirectory,readManifest,manifests} from './catalog.ts';
 
 async function noSymlinks(path:string){
