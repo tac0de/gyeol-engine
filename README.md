@@ -10,6 +10,7 @@
 - `tools`: 게임 생성·manifest 조회·로컬 미리보기·규칙 테스트·시나리오/재생. 미리보기는 Vite 8, 타입 검사는 TypeScript 7을 소비 프로젝트에 설치합니다. React/Vite/TypeScript는 선택적 peer이며 runtime/core에 로드되지 않습니다.
 - 게임 규칙·캐릭터/배경·미술 방향·계정/저장·공개 카탈로그는 소비 프로젝트가 소유합니다. tools의 생성물은 표준 `portal/games/<id>` 배치를 사용하며 플랫폼의 공개 승인을 수행하지 않습니다.
 - 에셋 생성·미술 판단은 native 에이전트가 담당합니다. 이 패키지는 모델 호출이나 자동 제작 루프를 추가하지 않습니다.
+- 이미지·애니메이션·카드/UI 프레임 제작은 [에셋 제작 진입점](docs/asset-production.md)에서 시작합니다. Codex Imagegen 원본→Aseprite 보정→TypeScript 후처리를 따르며 `/tools/asset-production`은 종류별 초안과 규격 누락 검사를 제공합니다.
 
 `import {createSession} from "@thedivineparadox/game-engine/runtime"`
 
@@ -21,7 +22,7 @@
 
 ## 빌드·설치
 
-Node 24.2+에서 `npm ci`, `npm run check`, `npm pack --pack-destination /absolute/output`을 실행합니다. `dist/`의 ESM JavaScript·타입 선언·CSS와 템플릿만 설치 파일에 포함합니다. 소비 프로젝트에서 `npm install /absolute/output/thedivineparadox-game-engine-0.2.0.tgz`로 설치합니다. npm registry 공개는 하지 않습니다. 소비자의 Node 요구사항이 더 높으면 그 요구사항을 따릅니다.
+Node 24.2+에서 `npm ci`, `npm run check`, `npm pack --pack-destination /absolute/output`을 실행합니다. `dist/`의 ESM JavaScript·타입 선언·CSS, 템플릿·AGENTS·제작 문서를 설치 파일에 포함합니다. 소비 프로젝트에서 `npm install /absolute/output/thedivineparadox-game-engine-0.4.0.tgz`로 설치합니다. npm registry 공개는 하지 않습니다. 소비자의 Node 요구사항이 더 높으면 그 요구사항을 따릅니다.
 
 엔진 변경은 버전을 올리고 새 설치 파일을 만든 뒤 소비 프로젝트의 lockfile과 함께 검토합니다. 기존 설치 파일을 같은 버전으로 교체하지 않습니다. `npm run check`는 runtime 회귀·공개 export·오프라인 별도 프로젝트 설치를 검사합니다. 현재 게임 5개의 실제 UI/CLI 호환성은 소비 프로젝트의 `npm run check`로 확인합니다.
 
@@ -74,7 +75,7 @@ Canvas2D는 제공하는 기본 표현 어댑터일 뿐입니다. core는 DOM �
 
 ## 비주얼 제작 도구
 
-[픽셀·Imagegen·손그림 제작 흐름](docs/visual-production.md)을 따릅니다. `/tools/visual`은 기존 커널/Aseprite의 명시적 호출과 pixel binding, `/tools/media`는 재사용 이미지 export/등록·decode 검사입니다. native 생성·미술 결정은 에이전트가 담당합니다.
+[제작 진입점과 template 계약](docs/asset-production.md), [시각 제작 흐름](docs/visual-production.md)을 따릅니다. `/tools/asset-production`은 초안과 명세 검사, `/tools/visual`은 기존 커널/Aseprite의 명시적 호출과 pixel binding, `/tools/media`는 재사용 이미지 export/등록·decode 검사입니다. native 생성·미술 결정은 에이전트가 담당합니다. 카드 프레임 template가 카드 렌더러나 자동 nine-slice 구현을 뜻하지는 않습니다.
 # 소스에 결속한 재현·규칙 실험
 
 `@thedivineparadox/game-engine/tools`의 `collectIdentity/createReproduction/replayReproduction/compareReproductions`는 선언한 rules/config/engine/assets 파일 지문과 실제 명령·tick trace를 연결합니다. 다른 지문은 실행 전에 거절하며 같은 version 문자열만으로 재생하지 않습니다. 기존 raw recording/replay는 그대로이며 새 bundle로 조용히 승격하지 않습니다.

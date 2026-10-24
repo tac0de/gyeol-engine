@@ -1,14 +1,16 @@
 {
   "name": "@thedivineparadox/game-engine",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
-  "description": "Reusable deterministic mobile web game runtime and explicit authoring tools",
+  "description": "Reusable deterministic game runtime and explicit asset authoring tools",
   "files": [
     "dist",
     "templates",
     "README.md",
-    "docs/visual-production.md"
+    "docs/visual-production.md",
+    "docs/asset-production.md",
+    "AGENTS.md"
   ],
   "exports": {
     "./runtime": {
@@ -58,6 +60,11 @@
       "import": "./dist/tools/media.js",
       "default": "./dist/tools/media.js"
     },
+    "./tools/asset-production": {
+      "types": "./dist/tools/asset-production.d.ts",
+      "import": "./dist/tools/asset-production.js",
+      "default": "./dist/tools/asset-production.js"
+    },
     "./tools/visual": {
       "types": "./dist/tools/visual.d.ts",
       "import": "./dist/tools/visual.js",
@@ -72,7 +79,7 @@
   },
   "scripts": {
     "build": "node scripts/build.ts",
-    "test": "node --test tests/runtime/*.test.ts tests/package.test.ts tests/visual.test.ts tests/reproduction.test.ts tests/experiments.test.ts",
+    "test": "node --test tests/runtime/*.test.ts tests/package.test.ts tests/visual.test.ts tests/asset-production.test.ts tests/reproduction.test.ts tests/experiments.test.ts",
     "check": "npm run build && npm test",
     "prepack": "npm run build",
     "test:visual-native": "node --test tests/visual-native.test.ts"

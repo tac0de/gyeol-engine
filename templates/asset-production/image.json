@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "kind": "image",
+  "game": null,
+  "id": null,
+  "purpose": null,
+  "visualBrief": null,
+  "canvas": {"width": null, "height": null},
+  "source": {"imagegen": null, "aseprite": null, "references": []},
+  "output": {"prefix": null, "scale": null, "palette": null, "alpha": null}
+}
