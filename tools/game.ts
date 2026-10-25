@@ -102,3 +102,5 @@ export async function testGames(root:string,id?:string){
  }
  return {games:ids.length};
 }
+
+export {profileScenario} from './profile.ts';

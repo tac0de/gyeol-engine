@@ -1,6 +1,6 @@
 {
   "name": "@thedivineparadox/game-engine",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "private": true,
   "type": "module",
   "description": "Reusable deterministic game runtime and explicit asset authoring tools",
@@ -16,7 +16,8 @@
     "docs/saves.md",
     "docs/engine-assessment.md",
     "AGENTS.md",
-    "LICENSE"
+    "LICENSE",
+    "docs/performance.md"
   ],
   "exports": {
     "./runtime": {
@@ -76,10 +77,27 @@
       "import": "./dist/tools/visual.js",
       "default": "./dist/tools/visual.js"
     },
-    "./tools/standalone": {"types":"./dist/tools/standalone.d.ts","import":"./dist/tools/standalone.js","default":"./dist/tools/standalone.js"},
-    "./runtime/browser/ui": {"types":"./dist/runtime/browser/ui.d.ts","import":"./dist/runtime/browser/ui.js","default":"./dist/runtime/browser/ui.js"},
-    "./runtime/browser/ui.css":"./dist/runtime/browser/ui.css",
-    "./runtime/browser/save":{"types":"./dist/runtime/browser/save.d.ts","import":"./dist/runtime/browser/save.js","default":"./dist/runtime/browser/save.js"}
+    "./tools/standalone": {
+      "types": "./dist/tools/standalone.d.ts",
+      "import": "./dist/tools/standalone.js",
+      "default": "./dist/tools/standalone.js"
+    },
+    "./runtime/browser/ui": {
+      "types": "./dist/runtime/browser/ui.d.ts",
+      "import": "./dist/runtime/browser/ui.js",
+      "default": "./dist/runtime/browser/ui.js"
+    },
+    "./runtime/browser/ui.css": "./dist/runtime/browser/ui.css",
+    "./runtime/browser/save": {
+      "types": "./dist/runtime/browser/save.d.ts",
+      "import": "./dist/runtime/browser/save.js",
+      "default": "./dist/runtime/browser/save.js"
+    },
+    "./runtime/browser/animations": {
+      "types": "./dist/runtime/browser/animations.d.ts",
+      "import": "./dist/runtime/browser/animations.js",
+      "default": "./dist/runtime/browser/animations.js"
+    }
   },
   "sideEffects": [
     "**/*.css"
@@ -87,10 +105,12 @@
   "engines": {
     "node": ">=24.2.0"
   },
-  "bin": {"gyeol":"dist/tools/cli.js"},
+  "bin": {
+    "gyeol": "dist/tools/cli.js"
+  },
   "scripts": {
     "build": "node scripts/build.ts",
-    "test": "node --test tests/runtime/*.test.ts tests/package.test.ts tests/visual.test.ts tests/asset-production.test.ts tests/reproduction.test.ts tests/experiments.test.ts tests/standalone.test.ts",
+    "test": "node --test tests/runtime/*.test.ts tests/package.test.ts tests/visual.test.ts tests/asset-production.test.ts tests/reproduction.test.ts tests/experiments.test.ts tests/standalone.test.ts tests/profile.test.ts",
     "check": "npm run build && npm test",
     "prepack": "npm run build",
     "test:visual-native": "node --test tests/visual-native.test.ts",
@@ -122,7 +142,8 @@
     "react": "19.3.0",
     "vite": "8.3.4",
     "typescript": "7.0.2",
-    "sharp": "^0.35.5"
+    "sharp": "^0.35.5",
+    "@playwright/test": "1.64.1"
   },
   "license": "MIT",
   "repository": {

@@ -6,9 +6,11 @@ export function mountBrowserGame<S extends Json,A extends Json>(element:HTMLElem
  input:(event:GameInput)=>A|undefined;
  render:(snapshot:Snapshot<S>,viewport:Viewport)=>void;
  changed?:(snapshot:Snapshot<S>)=>void;failed?:(error:unknown)=>void;
+ renderMode?:'every-frame'|'on-change';
 }){
  const {width,height}=options;
  if(!Number.isFinite(width)||width<=0||!Number.isFinite(height)||height<=0)throw Error('Invalid logical viewport');
+ if(options.renderMode!==undefined&&!['every-frame','on-change'].includes(options.renderMode))throw Error('Invalid render mode');
  let session=createSession(options.rules,options.seed);const frame=createFrameClock(),clock=createFixedClock();
  const abort=new AbortController();let raf=0,disposed=false,pointer:number|null=null,last={x:0,y:0},lastPhase:Snapshot<S>['phase']='ready';
  const keys=new Set<string>();
@@ -18,7 +20,7 @@ export function mountBrowserGame<S extends Json,A extends Json>(element:HTMLElem
  function schedule(){if(!disposed&&!raf&&lastPhase==='playing')raf=requestAnimationFrame(loop);}
  function loop(now:number){
   raf=0;if(disposed)return;
-  try{const steps=clock.frame(Math.round(frame.frame(now)*1000)).steps;notify(steps?session.command({type:'advance',ticks:steps}):undefined);schedule();}catch(error){fail(error);}
+  try{const steps=clock.frame(Math.round(frame.frame(now)*1000)).steps;if(steps)notify(session.command({type:'advance',ticks:steps}));else if(options.renderMode!=='on-change')notify();schedule();}catch(error){fail(error);}
  }
  function command(c:Command<A>){
   if(disposed)throw Error('Host disposed');

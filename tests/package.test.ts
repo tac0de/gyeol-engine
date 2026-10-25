@@ -1,3 +1,5 @@
+import {settleAnimations} from '@thedivineparadox/game-engine/runtime/browser/animations';
+import {profileScenario} from '../tools/profile.ts';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,existsSync,mkdtempSync,mkdirSync,writeFileSync,rmSync} from 'node:fs';
@@ -12,7 +14,7 @@ import {createGame,startPreview,testGames} from '@thedivineparadox/game-engine/t
 import {mountScreens,mountDialog} from '@thedivineparadox/game-engine/runtime/browser/ui';
 import {assetBriefTemplate,reviewAssetBrief} from '@thedivineparadox/game-engine/tools/asset-production';
 test('compiled public entries and shipped templates resolve without consumer source paths',()=>{
- assert.equal(typeof createSession,'function');assert.equal(typeof createGame,'function');assert.equal(typeof startPreview,'function');assert.equal(typeof testGames,'function');
+ assert.equal(typeof settleAnimations,'function');assert.equal(typeof profileScenario,'function');assert.equal(typeof createSession,'function');assert.equal(typeof createGame,'function');assert.equal(typeof startPreview,'function');assert.equal(typeof testGames,'function');
  assert.equal(typeof mountScreens,'function');assert.equal(typeof mountDialog,'function');
  assert.equal(typeof createSaveSlot,'function');assert.equal(typeof createBrowserSaveSlot,'function');assert.equal(typeof restoreSession,'function');
  const require=createRequire(import.meta.url),root=new URL('../',import.meta.url);

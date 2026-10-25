@@ -110,3 +110,5 @@ trace는 최대 16MiB·14,000지점, 기본 3,600진행 step이며 core의 기�
 Gyeol Engine source code, documentation, and shipped templates are available under the [MIT License](LICENSE). Commercial use and proprietary games are permitted. Preserve the copyright and license notice when redistributing the engine or substantial portions of its code.
 
 Third-party dependencies and their bundled native libraries retain their own licenses; this project does not relicense them. External artwork, audio, and individual game assets are not covered by this engine license merely because the engine uses them.
+
+0.8 keeps Gyeol as the project runtime. [Complete-game runtime work](docs/performance.md) adds opt-in state-driven drawing, deduplicated/queued owned image loading, native DOM effect completion, and `gyeol profile PROJECT GAME_ID --scenario FILE`. These are measured lifecycle/workflow changes; general superiority over Phaser remains unproven.
