@@ -1,6 +1,6 @@
 {
   "name": "@thedivineparadox/game-engine",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "private": true,
   "type": "module",
   "description": "Reusable deterministic game runtime and explicit asset authoring tools",
@@ -110,7 +110,7 @@
   },
   "scripts": {
     "build": "node scripts/build.ts",
-    "test": "node --test tests/runtime/*.test.ts tests/package.test.ts tests/visual.test.ts tests/asset-production.test.ts tests/reproduction.test.ts tests/experiments.test.ts tests/standalone.test.ts tests/profile.test.ts",
+    "test": "node --test tests/runtime/*.test.ts tests/package.test.ts tests/visual.test.ts tests/asset-production.test.ts tests/reproduction.test.ts tests/experiments.test.ts tests/standalone.test.ts tests/profile.test.ts tests/preview.test.ts",
     "check": "npm run build && npm test",
     "prepack": "npm run build",
     "test:visual-native": "node --test tests/visual-native.test.ts",

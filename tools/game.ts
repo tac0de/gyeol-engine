@@ -1,5 +1,5 @@
 import {readFile,readdir,mkdir,writeFile,lstat,rm,realpath} from 'node:fs/promises';
-import {join,resolve,dirname,relative,isAbsolute,sep} from 'node:path';
+import {join,resolve,dirname,basename,relative,isAbsolute,sep} from 'node:path';
 import {homedir} from 'node:os';
 import {pathToFileURL,fileURLToPath} from 'node:url';
 import {spawnSync} from 'node:child_process';
@@ -61,9 +61,16 @@ export async function runScenario(root:string,id:string,source:string,output:str
  await writePrivateOutput(root,output,{snapshot,recording,sha256:digest});return {gameId:id,phase:snapshot.phase,sha256:digest,output};
 }
 /** Isolated local preview: no platform server, account API, cookies or personal DB. */
-export async function startPreview(root:string,id:string,options:{port?:number;instance?:string}={}){
+export async function startPreview(root:string,id:string,options:{port?:number;instance?:string;stateDir?:string}={}){
  root=await realpath(root);await readManifest(root,id);const instance=gameId(options.instance??'default');
- const scope=createHash('sha256').update(root).digest('hex').slice(0,12),profile=join(homedir(),'.local/state/tdp-game-previews',scope,id,instance);
+ let state=options.stateDir??join(homedir(),'.local/state/tdp-game-previews');
+ if(options.stateDir!==undefined){
+  if(typeof options.stateDir!=='string'||!isAbsolute(state))throw Error('Preview state must be absolute');state=resolve(state);await noSymlinks(state);
+  let ancestor=state;const tail:string[]=[];
+  for(;;)try{state=join(await realpath(ancestor),...tail.reverse());break;}catch(error){if((error as NodeJS.ErrnoException).code!=='ENOENT')throw error;tail.push(basename(ancestor));ancestor=dirname(ancestor);}
+  const rel=relative(root,state);if(!rel.startsWith('..'+sep)&&rel!=='..'&&!isAbsolute(rel))throw Error('Preview state must stay outside source');
+ }
+ const scope=createHash('sha256').update(root).digest('hex').slice(0,12),profile=join(state,scope,id,instance);
  await mkdir(profile,{recursive:true,mode:0o700});const lock=join(profile,'active.lock');await mkdir(lock);
  const entry='/__tdp_entry.tsx',virtual='\0tdp-preview-entry.tsx';let server:Awaited<ReturnType<typeof createServer>>|undefined;
  try{

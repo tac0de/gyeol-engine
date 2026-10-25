@@ -53,3 +53,7 @@ These are same-environment Node command/copy/validation costs. They are not brow
 - Existing standalone acceptance remains a separate web play/save/replay flow. Desktop packaging stays optional.
 
 Primary API references: [getAnimations](https://developer.mozilla.org/en-US/docs/Web/API/Element/getAnimations), [Animation.finished](https://developer.mozilla.org/en-US/docs/Web/API/Animation/finished).
+
+## Explicit preview state (0.8.1)
+
+`startPreview(project, id, {stateDir: ABS_PRIVATE_DIRECTORY})` uses an explicitly owned absolute directory outside project source for its existing project/game/instance profiles and locks. Relative, inside-source and symlink paths are rejected before creating state. The historical default remains unchanged; there is no permission-error fallback and no HOME/security-setting modification. Close the returned server before deleting owned state. This lets guarded development checks use a permitted private directory without duplicating the preview host.
