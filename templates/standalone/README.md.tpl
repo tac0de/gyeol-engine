@@ -25,9 +25,18 @@ npm run scenario -- --out /absolute/new-run.json
 npm run replay -- /absolute/new-run.json
 npx playwright install chromium
 npm run check:browser -- --evidence-dir /absolute/private-evidence
+npm run check:persistence -- --evidence-dir /absolute/private-persistence
 ```
 
 Browser checks exercise visible controls, actual headless keyboard/pointer input, menu/play/results, modal/focus/independent pause, repeated navigation, export/import/replay, and responsive layout. A separate browser fixture checks the shipped screen/dialog lifecycle APIs. Review screenshots directly; checks do not establish fun, art quality, or all-browser support. The scenario uses ordinary engine commands, not a second simulation. A replay is not a persistent player save or source-authenticated reproduction.
+
+## Progress and recovery
+
+Moves are saved on this browser origin. Continue resumes from a validated checkpoint, including game time/RNG, without storing the old command history. `src/progress.ts` owns schema 2 and the explicit v1 migration. Read-only load never upgrades or repairs stored bytes automatically. Restore backup and confirmed reset are separate player choices; Retry save handles a transient write failure while preserving the in-memory run. Download stored data preserves the last observed bytes for diagnostics, not an import/recovery API. Starting a new circuit replaces the current saved run.
+
+Browser storage can be denied, full, cleared, or evicted. On failure the game continues in memory and keeps the old slot. A future-version save is protected; after access returns, unread existing progress requires a choice rather than silent replacement. Cloud sync and transactional multi-tab saves are not included. Page hide saving is best-effort; meaningful move boundaries are saved earlier.
+
+Checkpoint-origin exported trails use format 2; the current replay CLI/UI handles them. Old format-1 trails remain supported. The persistence test uses a private disposable browser profile and actual browser-process close/reopen, with controlled migration/corruption/quota/access fixtures.
 
 ## Optional desktop trial
 
@@ -41,6 +50,6 @@ npm run desktop:smoke -- --report /absolute/new-desktop-report.json
 
 Setup pins/adds Electron and packager to this project's development dependencies and lockfile. Packaging produces a host-native unsigned app under `desktop-out/`. It bundles local files, exposes no Node/preload bridge, enables sandbox/context isolation, denies permissions/remote requests/navigation/new windows, and does not require a server while playing. The smoke launches a hidden packaged window, uses visible menu/result controls, verifies play/replay/isolation, saves report/capture, and exits.
 
-The local protected macOS shell may reject nested Electron sandbox initialization. Keep protections enabled and use the engine repository's manual isolated Mac workflow for compatibility checks. Only the tested host is covered. Signing/notarization, Steam, installers, auto-updates, other OS certification, player saves, and a complete asset pipeline are separate work.
+The local protected macOS shell may reject nested Electron sandbox initialization. Keep protections enabled and use the engine repository's manual isolated Mac workflow for compatibility checks. Only the tested host is covered. Signing/notarization, Steam, installers, auto-updates, other OS certification, cloud/account saves and a complete asset pipeline are separate work.
 
 MIT; retain engine and dependency licenses. Commit `package-lock.json` after installation to pin your project's tools. See the engine's `docs/ui.md` and `docs/roadmap.md` for the current UI scope and remaining public-beta work.

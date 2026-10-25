@@ -38,3 +38,18 @@ test('a full recording can restart and preserve pause reasons in a new replayabl
 test('failed restart retains the current run and recording',()=>{
  let creates=0;const game=createSession({...rules,create:c=>{if(creates++)throw Error('reset failed');return rules.create(c);}},42);game.command({type:'start'});game.command({type:'advance',ticks:3});const before=game.inspect(),recording=game.exportRecording();assert.throws(()=>game.command({type:'restart'}),/reset failed/);assert.deepEqual(game.inspect(),before);assert.deepEqual(game.exportRecording(),recording);
 });
+
+test('durable checkpoint restores state/tick/RNG without history or environmental pauses',async()=>{
+ const {restoreSession,isCheckpoint}=await import('../../runtime/core/index.ts');
+ const randomRules={...rules,update:(s:{value:number;target:number},c:{random:()=>number})=>({...s,value:s.value+1,target:Math.floor(c.random()*10000)})};
+ const original=createSession(randomRules,31);original.command({type:'start'});original.command({type:'advance',ticks:7});original.command({type:'pause',reason:'hidden',paused:true});const checkpoint=original.exportCheckpoint();assert.equal(isCheckpoint(randomRules,checkpoint),true);assert.equal(Object.hasOwn(checkpoint,'commands'),false);
+ const restored=restoreSession(randomRules,checkpoint);assert.deepEqual(restored.inspect().state,original.inspect().state);assert.equal(restored.inspect().tick,7);assert.equal(restored.inspect().phase,'playing');assert.deepEqual(restored.inspect().pauseReasons,[]);assert.equal(restored.exportRecording().commands.length,0);assert.equal(restored.exportRecording().format,2);
+ original.command({type:'pause',reason:'hidden',paused:false});for(const game of [original,restored])game.command({type:'advance',ticks:4});assert.deepEqual(restored.inspect(),original.inspect());assert.deepEqual(replay(randomRules,restored.exportRecording()).inspect(),restored.inspect());
+ checkpoint.state.value=500;assert.notEqual(restored.inspect().state.value,500);assert.throws(()=>restoreSession(randomRules,{...checkpoint,tick:-1}));assert.throws(()=>restoreSession(randomRules,{...checkpoint,version:'future'}));assert.throws(()=>replay(randomRules,{...restored.exportRecording(),seed:32}));
+ restored.command({type:'restart'});assert.equal(restored.exportRecording().format,1);assert.deepEqual(replay(randomRules,restored.exportRecording()).inspect(),restored.inspect());restored.dispose();assert.throws(()=>restored.exportCheckpoint(),/disposed/);
+});
+
+test('checkpoint-origin failed restart preserves baseline, state, and replay',async()=>{
+ const {restoreSession}=await import('../../runtime/core/index.ts');const original=createSession(rules,3);original.command({type:'start'});original.command({type:'advance',ticks:2});
+ const broken={...rules,create:()=>{throw Error('reset broken');}},game=restoreSession(broken,original.exportCheckpoint());const before=game.inspect(),recording=game.exportRecording();assert.throws(()=>game.command({type:'restart'}));assert.deepEqual(game.inspect(),before);assert.deepEqual(game.exportRecording(),recording);assert.deepEqual(replay(broken,recording).inspect(),before);
+});

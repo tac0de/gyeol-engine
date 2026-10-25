@@ -1,4 +1,4 @@
-import {createSession,createFrameClock,createFixedClock,type GameRules,type Json,type Command,type Snapshot} from '../core/index.ts';
+import {createSession,restoreSession,createFrameClock,createFixedClock,type GameRules,type Json,type Command,type Snapshot} from '../core/index.ts';
 export type GameInput={type:'pointer';phase:'down'|'move'|'up'|'cancel';x:number;y:number}|{type:'key';key:string;pressed:boolean;cancelled?:boolean};
 export type Viewport={width:number;height:number;dpr:number};
 export function mountBrowserGame<S extends Json,A extends Json>(element:HTMLElement,options:{
@@ -9,7 +9,7 @@ export function mountBrowserGame<S extends Json,A extends Json>(element:HTMLElem
 }){
  const {width,height}=options;
  if(!Number.isFinite(width)||width<=0||!Number.isFinite(height)||height<=0)throw Error('Invalid logical viewport');
- const session=createSession(options.rules,options.seed),frame=createFrameClock(),clock=createFixedClock();
+ let session=createSession(options.rules,options.seed);const frame=createFrameClock(),clock=createFixedClock();
  const abort=new AbortController();let raf=0,disposed=false,pointer:number|null=null,last={x:0,y:0},lastPhase:Snapshot<S>['phase']='ready';
  const keys=new Set<string>();
  function draw(snapshot=session.inspect()){options.render(snapshot,{width,height,dpr:Math.min(window.devicePixelRatio||1,2)});}
@@ -62,5 +62,13 @@ export function mountBrowserGame<S extends Json,A extends Json>(element:HTMLElem
  }
  // Initial visibility is an independent reason, including a restart in a hidden tab.
  try{session.command({type:'pause',reason:'hidden',paused:document.hidden});notify();}catch(error){dispose();throw error;}
- return {command(c:Command<A>){if(c.type==='restart'){const result=command(c);clearInput();return result;}if(c.type==='pause'&&c.paused)clearInput();return command(c);},pause:(value:boolean)=>paused('manual',value),inspect:session.inspect,exportRecording:session.exportRecording,dispose};
+ return {command(c:Command<A>){if(c.type==='restart'){const result=command(c);clearInput();return result;}if(c.type==='pause'&&c.paused)clearInput();return command(c);},pause:(value:boolean)=>paused('manual',value),
+  inspect:()=>session.inspect(),exportRecording:()=>session.exportRecording(),exportCheckpoint:()=>session.exportCheckpoint(),
+  restoreCheckpoint(value:unknown){
+   if(disposed)throw Error('Host disposed');const next=restoreSession(options.rules,value);
+   try{for(const reason of session.inspect().pauseReasons)next.command({type:'pause',reason,paused:true});next.command({type:'pause',reason:'hidden',paused:document.hidden});clearInput(false);}
+   catch(error){next.dispose();throw error;}
+   const previous=session;session=next;previous.dispose();frame.reset();clock.reset();if(raf)cancelAnimationFrame(raf);raf=0;
+   try{notify();schedule();return session.inspect();}catch(error){fail(error);throw error;}
+  },dispose};
 }

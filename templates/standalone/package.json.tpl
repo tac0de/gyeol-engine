@@ -14,6 +14,7 @@
     "scenario": "node scripts/game.ts scenario",
     "replay": "node scripts/game.ts replay",
     "check:browser": "node tests/browser.ts",
+    "check:persistence": "node tests/persistence.ts",
     "desktop:setup": "node scripts/desktop.ts setup",
     "desktop:package": "npm run build && node scripts/desktop.ts package",
     "desktop:smoke": "node scripts/desktop.ts smoke"

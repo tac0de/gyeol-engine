@@ -15,11 +15,13 @@ npm install
 npm run dev
 ```
 
-`gyeol create`가 기존 포털 없이 실행되는 작은 웹 2D 회로 퍼즐을 생성합니다. 0.6.0은 공용 화면 생명주기·포커스·native 모달·반응형 UI 기본 도구와 메뉴→플레이→결과 예제를 제공합니다. 설치한 엔진을 `vendor/gyeol-engine.tgz`로 동봉하며 규칙·화면·검사·CLI 시나리오·UI 기록 내보내기/불러오기/리플레이가 포함됩니다. `npm run check`, `npm run scenario -- --out /absolute/run.json`, `npm run replay -- /absolute/run.json`으로 같은 규칙을 검사·재현합니다.
+`gyeol create`가 기존 포털 없이 실행되는 작은 웹 2D 회로 퍼즐을 생성합니다. 0.6부터 공용 화면 생명주기·포커스·native 모달·반응형 UI 기본 도구와 메뉴→플레이→결과 예제를 제공합니다. 설치한 엔진을 `vendor/gyeol-engine.tgz`로 동봉하며 규칙·화면·검사·CLI 시나리오·UI 기록 내보내기/불러오기/리플레이가 포함됩니다. `npm run check`, `npm run scenario -- --out /absolute/run.json`, `npm run replay -- /absolute/run.json`으로 같은 규칙을 검사·재현합니다.
 
 웹 기본 설치에는 Electron이 없습니다. 선택적으로 `npm run desktop:setup` 후 `npm run desktop:package`와 `npm run desktop:smoke -- --report /absolute/report.json`은 현재 OS/아키텍처의 Electron 패키징과 숨김 실행을 시험합니다. 정식 배포 서명·Steam·다른 OS 검증은 포함하지 않습니다. [독립 제작 안내](docs/standalone.md)에 headless 플레이 검사·공개 API·설치 파일 검증 절차가 있습니다.
 
 [화면·UI API](docs/ui.md) · [외부 사용자를 위한 공개 베타 구현 범위](docs/roadmap.md)
+
+0.7.0은 상태·tick·RNG 체크포인트와 버전형 브라우저 저장·마이그레이션·이전 정상본 복구·저장 실패 재시도를 추가합니다. [저장 API](docs/saves.md)와 [현재 엔진 가치·공개 전략 평가](docs/engine-assessment.md)를 참고하세요. 현재는 실게임 효과와 외부 사용자 효용이 검증되지 않은 experimental 단계입니다.
 
 ## 경계와 사용
 
@@ -41,7 +43,7 @@ npm run dev
 
 ## 빌드·설치
 
-Node 24.2+에서 `npm ci`, `npm run check`, `npm pack --pack-destination /absolute/output`을 실행합니다. `dist/`의 ESM JavaScript·타입 선언·CSS, 템플릿·AGENTS·제작 문서를 설치 파일에 포함합니다. 소비 프로젝트에서 `npm install /absolute/output/thedivineparadox-game-engine-0.6.0.tgz`로 설치합니다. npm registry 공개는 하지 않습니다. 소비자의 Node 요구사항이 더 높으면 그 요구사항을 따릅니다.
+Node 24.2+에서 `npm ci`, `npm run check`, `npm pack --pack-destination /absolute/output`을 실행합니다. `dist/`의 ESM JavaScript·타입 선언·CSS, 템플릿·AGENTS·제작 문서를 설치 파일에 포함합니다. 소비 프로젝트에서 `npm install /absolute/output/thedivineparadox-game-engine-0.7.0.tgz`로 설치합니다. npm registry 공개는 하지 않습니다. 소비자의 Node 요구사항이 더 높으면 그 요구사항을 따릅니다.
 
 엔진 변경은 버전을 올리고 새 설치 파일을 만든 뒤 소비 프로젝트의 lockfile과 함께 검토합니다. 기존 설치 파일을 같은 버전으로 교체하지 않습니다. `npm run check`는 runtime 회귀·공개 export·오프라인 별도 프로젝트 설치를 검사합니다. 현재 게임 5개의 실제 UI/CLI 호환성은 소비 프로젝트의 `npm run check`로 확인합니다.
 
@@ -63,7 +65,7 @@ Native Codex가 게임을 설계·편집하고, 이 패키지의 TypeScript 엔�
 | `browser/audio.ts` | 사용자 입력 후 활성화하는 선택적 음향, 음소거·종료 |
 | `react/game-surface.tsx` | 선택적 Canvas2D 화면과 시작/정지/재시작 UI |
 
-핵심 API는 `createSession(rules, seed)`의 `command`, `inspect`, `exportRecording`, `dispose`입니다. `start`, `advance {ticks}`, `action {action}`, `pause {reason,paused}`, `restart` 명령을 브라우저와 CLI가 공유합니다. 규칙의 `create/reduce/update/finished`에는 DOM·React·계정·벽시계가 없습니다. 난수는 context.random을 사용합니다. 규칙이 외부 시계나 Math.random을 직접 읽으면 재현 보장은 성립하지 않습니다.
+핵심 API는 `createSession(rules, seed)`의 `command`, `inspect`, `exportRecording`, `exportCheckpoint`, `dispose`입니다. `start`, `advance {ticks}`, `action {action}`, `pause {reason,paused}`, `restart` 명령을 브라우저와 CLI가 공유합니다. 규칙의 `create/reduce/update/finished`에는 DOM·React·계정·벽시계가 없습니다. 난수는 context.random을 사용합니다. 규칙이 외부 시계나 Math.random을 직접 읽으면 재현 보장은 성립하지 않습니다.
 
 `inspect`는 복사본을 반환합니다. 실패한 규칙 호출은 상태·tick·난수를 복구합니다. 기록은 게임 ID·규칙 버전·seed에 결속하며 10,000개 명령과 1MB JSON 범위로 제한합니다. 연속 advance는 합쳐 저장합니다. restart는 이전 판의 기록을 비우고 새 기록 구간을 시작합니다. 현재 pause 사유는 새 기록의 시작에 보존하므로 숨겨진 탭에서 재시작해도 정확히 replay할 수 있습니다. 필요한 이전 판의 recording은 restart 전에 export해야 합니다. 기록 한도에서도 restart가 가능하며, 실패한 restart는 이전 상태와 기록을 보존합니다. 같은 JS 환경에서의 재현이며 모든 JS 엔진 간 수치 동일성이나 서버 점수의 부정행위 방지를 뜻하지 않습니다. 공개 점수판·경쟁 점수 검증은 포함하지 않습니다.
 

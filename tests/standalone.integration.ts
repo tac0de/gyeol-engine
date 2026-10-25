@@ -29,8 +29,9 @@ const recording=join(evidence,'scenario.json');run(project,['npm','run','scenari
 const replayText=run(project,[process.execPath,'scripts/game.ts','replay',recording]);const snapshot=JSON.parse(replayText);assert.equal(snapshot.phase,'finished');
 run(project,[process.execPath,'node_modules/playwright/cli.js','install','chromium']);
 run(project,['npm','run','check:browser','--','--evidence-dir',join(evidence,'browser')]);
+run(project,['npm','run','check:persistence','--','--evidence-dir',join(evidence,'persistence')]);
 if(!desktop){
- await writeFile(join(evidence,'acceptance.json'),JSON.stringify({project,engineVersion:pack.version,scenario:snapshot,browser:JSON.parse(await readFile(join(evidence,'browser/browser-result.json'),'utf8')),desktop:{status:'not_requested'},webOnlyInstall:true},null,2));
+ await writeFile(join(evidence,'acceptance.json'),JSON.stringify({project,engineVersion:pack.version,scenario:snapshot,browser:JSON.parse(await readFile(join(evidence,'browser/browser-result.json'),'utf8')),persistence:JSON.parse(await readFile(join(evidence,'persistence/persistence-result.json'),'utf8')),desktop:{status:'not_requested'},webOnlyInstall:true},null,2));
  console.log(JSON.stringify({project,engineVersion:pack.version,steps:sequence,webOnlyInstall:true,desktopExecution:'not_requested'}));
  process.exit(0);
 }
@@ -42,7 +43,7 @@ const archive=process.platform==='darwin'?join(packageResult.paths[0],'signal-ga
 const contents=asar.listPackage(archive) as string[];
 for(const file of ['/main.cjs','/dist/index.html','/LICENSE','/ENGINE-LICENSE'])assert.ok(contents.includes(file),file);
 assert.ok(contents.some(x=>/\/dist\/assets\/.+\.js$/.test(x)));assert.ok(contents.some(x=>/\/dist\/assets\/.+\.css$/.test(x)));assert.ok(!contents.some(x=>x.includes('/node_modules')));
-const acceptance={project,engineVersion:pack.version,scenario:snapshot,browser:JSON.parse(await readFile(join(evidence,'browser/browser-result.json'),'utf8')),packageResult,archiveContents:contents,desktop:{status:'not_run'} as Record<string,unknown>};
+const acceptance={project,engineVersion:pack.version,scenario:snapshot,browser:JSON.parse(await readFile(join(evidence,'browser/browser-result.json'),'utf8')),persistence:JSON.parse(await readFile(join(evidence,'persistence/persistence-result.json'),'utf8')),packageResult,archiveContents:contents,desktop:{status:'not_run'} as Record<string,unknown>};
 await writeFile(join(evidence,'acceptance.json'),JSON.stringify(acceptance,null,2));
 try{
  if(packageOnly){acceptance.desktop={status:'not_run',verified:false,reason:'Explicit --package-only; packaged execution remains a separate check.'};}

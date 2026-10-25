@@ -8,3 +8,5 @@
 - Never use hidden inactive-screen controls as user actions. Use the visible menu, result buttons, native pause dialog, and file input associated with the visible Import trail label.
 - Web development is the default. Electron is absent until explicitly requested with `npm run desktop:setup`; PC packaging is optional.
 - Preserve user content, licenses, credentials, and unrelated changes. Do not publish, deploy, install optional tools, or call paid generation services without task authorization.
+
+- `src/progress.ts` owns the game save schema/migrations. Use checkpoint + versioned save APIs; do not equate replay history with player saves. Never silently overwrite unread, corrupt, future, or conflicting progress. Keep auto-save off while showing an imported/replayed trail. Run `check:persistence -- --evidence-dir ABS_PRIVATE_DIR` for restart/migration/recovery/failure checks.

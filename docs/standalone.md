@@ -1,6 +1,6 @@
 # Standalone web 2D authoring
 
-Gyeol Engine 0.6.0 targets agent-assisted web 2D game development. Desktop packaging is optional. Node 24.2+ is needed for development.
+Gyeol Engine 0.7.0 targets agent-assisted web 2D game development. Desktop packaging is optional. Node 24.2+ is needed for development.
 
 ```sh
 npm ci
@@ -15,6 +15,8 @@ From an engine tarball, `npm exec --package=/absolute/engine.tgz -- gyeol create
 
 The project contains its own engine tarball, rules/presentation source, menu/play/results and pause dialog, UI JSON export/import/replay, tests, and CLI inspect/scenario/replay. There is no portal, React, account, database, personal kernel, or proprietary generation requirement. Web development dependencies include Vite, TypeScript, and Playwright; Electron/packager are absent from a normal install. The old portal `createGame` API remains available for existing consumers. See [UI API](ui.md) and [public beta scope](roadmap.md).
 
+The generated game also has schema-versioned local progress, Continue, explicit backup restoration, confirmed reset, and failed-save retry. See [save/checkpoint contracts](saves.md). Saved game data is separate from replay files and cloud/account storage.
+
 ## Verify the web loop
 
 ```sh
@@ -22,7 +24,7 @@ npm run check
 node tests/standalone.integration.ts --evidence-dir /absolute/private-evidence
 ```
 
-Repository checks verify engine regressions and generator boundaries. Full web integration packs the engine, installs its actual `gyeol` bin into an unrelated bootstrap, creates a fresh project, verifies Electron is absent, builds/tests it, and exercises the visible menu/play/results/pause flow, focus, lifecycle, keyboard/pointer, export/import/replay and responsive layout in headless Chromium. Reports/screenshots/logs stay outside source. Inspect screenshots; passing tests do not establish fun or art quality. Other browsers/devices remain separate verification until the support matrix is established.
+Repository checks verify engine regressions and generator boundaries. Full web integration packs the engine, installs its actual `gyeol` bin into an unrelated bootstrap, creates a fresh project, verifies Electron is absent, builds/tests it, and exercises the visible menu/play/results/pause flow, focus, lifecycle, keyboard/pointer, export/import/replay and responsive layout in headless Chromium. Persistence acceptance additionally closes/relaunches an owned persistent browser profile and checks migration, corruption, quota/denial, and replay after resuming. Reports/screenshots/logs stay outside source. Inspect screenshots; passing tests do not establish fun or art quality. Other browsers/devices remain separate verification until the support matrix is established.
 
 ## Optional desktop feasibility host
 

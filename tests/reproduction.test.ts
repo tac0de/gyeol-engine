@@ -36,3 +36,7 @@ test('bounded trace, changed bytes, path escape and symlinks fail explicitly',as
  await assert.rejects(collectIdentity('demo',{rules:{root,files:['../escape']}}),/relative/);
  await symlink(join(root,'rules.ts'),join(root,'alias.ts'));await assert.rejects(collectIdentity('demo',{rules:{root,files:['alias.ts']}}),/regular path/);
 });
+
+test('source-bound reproduction accepts checkpoint-origin recordings without replaying old history',async t=>{
+ const {createSession,restoreSession}=await import('../runtime/core/index.ts');const {identity}=await fixture(t);const initial=createSession(rules,42);initial.command({type:'start'});initial.command({type:'advance',ticks:6});const continued=restoreSession(rules,initial.exportCheckpoint());continued.command({type:'advance',ticks:3});const recording=continued.exportRecording();assert.equal(recording.format,2);const bundle=createReproduction(rules,identity,recording);assert.equal(bundle.final.tick,9);assert.equal(replayReproduction(rules,identity,bundle).matched,true);
+});

@@ -1,6 +1,7 @@
 import {mountScreens,mountDialog} from '@thedivineparadox/game-engine/runtime/browser/ui';
 import {mountBrowserGame,type GameInput} from '@thedivineparadox/game-engine/runtime/browser/host';
-import {createSession,replay,type Snapshot,type Recording} from '@thedivineparadox/game-engine/runtime';
+import {createSession,replay,type Snapshot,type Recording,type SaveIssue} from '@thedivineparadox/game-engine/runtime';
+import {createProgressSlot} from './progress.ts';
 import {rules,WIDTH,HEIGHT,WALLS,NODES,EXIT,type State,type Action} from './rules.ts';
 const board=document.querySelector<HTMLCanvasElement>('#board')!,ctx=board.getContext('2d')!;
 const text=(id:string,value:string)=>{document.getElementById(id)!.textContent=value;};
@@ -8,6 +9,7 @@ const el=<T extends HTMLElement=HTMLElement>(id:string)=>document.getElementById
 const start=el<HTMLButtonElement>('start'),play=el<HTMLButtonElement>('replay'),save=el<HTMLButtonElement>('export'),load=el<HTMLInputElement>('import'),home=el<HTMLButtonElement>('home'),pause=el<HTMLButtonElement>('pause');
 type ScreenId='menu'|'play'|'result';let screens:{show(id:ScreenId):void;current():ScreenId|null;dispose():void}|undefined;
 const lifetime=new AbortController();
+const progress=createProgressSlot();let stored=progress.load(),writeIssue:SaveIssue|undefined,maySave=false,lastAttemptedMoves=-1,needsStoredChoice=false;
 let showingReplay=false,timer:ReturnType<typeof setTimeout>|undefined,recording:Recording<Action>|undefined,playback:ReturnType<typeof createSession<State,Action>>|undefined;
 const directionKeys:Record<string,Action['direction']>={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down'};
 function render(s:Snapshot<State>){
@@ -39,24 +41,27 @@ function input(e:GameInput):Action|undefined{
 }
 const host=mountBrowserGame(board,{rules,seed:17,width:720,height:400,input,render:s=>{if(!showingReplay)render(s);},changed:s=>{
  if(s.state.moves>0){save.disabled=false;play.disabled=false;}
+ if(maySave&&!showingReplay&&s.state.moves!==lastAttemptedMoves)persistProgress();
  if(s.state.won&&!showingReplay&&screens?.current()==='play'){recording=host.exportRecording();screens.show('result');}
 },failed:error=>text('message','Could not continue: '+String(error))});
 function stopPlayback(){if(timer)clearTimeout(timer);timer=undefined;playback?.dispose();playback=undefined;showingReplay=false;}
 const pauseDialog=mountDialog(el<HTMLDialogElement>('pause-dialog'),{focus:el('resume'),returnFocus:board,changed:open=>host.command({type:'pause',reason:'ui-dialog',paused:open})});
 function startRun(){
+ maySave=false;needsStoredChoice=false;
  stopPlayback();pauseDialog.close();delete board.dataset.replayVerified;recording=undefined;
  host.command({type:'restart'});host.command({type:'pause',reason:'replay',paused:false});screens!.show('play');pause.disabled=false;host.command({type:'start'});board.focus();save.disabled=true;play.disabled=true;
  text('message','Use the arrow keys, or click a neighbouring tile. Escape pauses the circuit.');
+ maySave=true;lastAttemptedMoves=-1;persistProgress();
 }
 screens=mountScreens<ScreenId>(el('screens'),{initial:'menu',screens:{
  menu:{element:el('menu'),focus:start,enter:({signal})=>{stopPlayback();host.command({type:'pause',reason:'screen',paused:true});start.addEventListener('click',startRun,{signal});text('message','Start when you are ready. There is no time limit.');}},
  play:{element:el('play'),focus:board,enter:({signal})=>{host.command({type:'pause',reason:'screen',paused:false});el('restart').addEventListener('click',startRun,{signal});pause.addEventListener('click',()=>pauseDialog.open(),{signal});return ()=>{pauseDialog.close();host.command({type:'pause',reason:'screen',paused:true});};}},
  result:{element:el('result'),focus:el('again'),enter:({signal})=>{host.command({type:'pause',reason:'screen',paused:true});text('result-moves',String(host.inspect().state.moves));text('message','All three nodes are awake. Keep your trail or try a different route.');el('again').addEventListener('click',startRun,{signal});el('result-replay').addEventListener('click',playTrail,{signal});el('result-export').addEventListener('click',exportTrail,{signal});}},
-},changed:id=>{el('screens').dataset.screen=id;home.hidden=id==='menu';pause.hidden=id!=='play';pause.disabled=showingReplay;}});
+},changed:id=>{el('screens').dataset.screen=id;home.hidden=id==='menu';pause.hidden=id!=='play';pause.disabled=showingReplay;refreshPersistence();}});
 function currentRecording(){return recording??host.exportRecording();}
 function playTrail(){
  const data=currentRecording();const verified=replay(rules,data);const expected=JSON.stringify(verified.inspect());verified.dispose();stopPlayback();delete board.dataset.replayVerified;recording=data;showingReplay=true;
- host.command({type:'pause',reason:'replay',paused:true});screens!.show('play');pause.disabled=true;playback=createSession(rules,data.seed);let index=0;play.disabled=true;
+ host.command({type:'pause',reason:'replay',paused:true});screens!.show('play');pause.disabled=true;playback=replay(rules,{...data,commands:[]});let index=0;play.disabled=true;refreshPersistence();
  function step(){
   if(!playback)return;
   // Advance and environmental commands belong to the same recording, but only actions need a visual beat.
@@ -70,7 +75,45 @@ home.addEventListener('click',()=>screens!.show('menu'),{signal:lifetime.signal}
 el('resume').addEventListener('click',()=>pauseDialog.close(),{signal:lifetime.signal});el('pause-restart').addEventListener('click',startRun,{signal:lifetime.signal});el('pause-menu').addEventListener('click',()=>screens!.show('menu'),{signal:lifetime.signal});
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&screens?.current()==='play'&&!showingReplay&&!pauseDialog.isOpen()){event.preventDefault();pauseDialog.open();}},{signal:lifetime.signal});
 load.addEventListener('change',async()=>{
- try{const file=load.files?.[0];if(!file)return;if(file.size>1_000_000)throw Error('Trail exceeds 1 MB');const data=JSON.parse(await file.text()),verified=replay(rules,data);if(lifetime.signal.aborted){verified.dispose();return;}stopPlayback();pauseDialog.close();recording=data;showingReplay=true;host.command({type:'pause',reason:'replay',paused:true});screens!.show('play');pause.disabled=true;playback=verified;render(verified.inspect());save.disabled=false;play.disabled=false;text('message','Trail imported and verified. Replay it to follow the route.');}
+ try{const file=load.files?.[0];if(!file)return;if(file.size>1_000_000)throw Error('Trail exceeds 1 MB');const data=JSON.parse(await file.text()),verified=replay(rules,data);if(lifetime.signal.aborted){verified.dispose();return;}stopPlayback();pauseDialog.close();recording=data;showingReplay=true;host.command({type:'pause',reason:'replay',paused:true});screens!.show('play');pause.disabled=true;playback=verified;render(verified.inspect());save.disabled=false;play.disabled=false;refreshPersistence();text('message','Trail imported and verified. Replay it to follow the route.');}
  catch(error){text('message','Could not import trail: '+(error instanceof Error?error.message:String(error)));}finally{load.value='';}
 },{signal:lifetime.signal});
-window.addEventListener('pagehide',()=>{lifetime.abort();screens?.dispose();pauseDialog.dispose();stopPlayback();host.dispose();},{once:true});
+function refreshPersistence(){
+ const issue=writeIssue??(stored.status==='error'||stored.status==='recoverable'?stored.reason:undefined);
+ const messages:Partial<Record<SaveIssue,string>>={quota_exceeded:'Storage is full. Your current run is still in memory. Retry after freeing space.',unavailable:'Browser storage is unavailable. Your run can continue in memory.',not_loaded:'Saved progress has not been read. Retry when storage is available.',conflict:'Stored progress changed elsewhere. Reload before saving over it.',future_version:'This save is from a newer version. It has been kept unchanged.',migration_missing:'This older save needs an unavailable upgrade. It has been kept.',migration_failed:'The save upgrade failed. The original has been kept.',recovery_required:'A previous good save is available. Restore it before saving.',corrupt:'Saved data is damaged. It has been kept for download or explicit reset.',invalid_data:'Saved data cannot be used by this game. It has been kept.',too_large:'Saved data exceeds this game’s size limit. It has been kept.',write_failed:'Saving failed. Your current run is still in memory.',invalid_value:'This progress cannot be saved safely.'};
+ text('save-status',writeIssue?messages[writeIssue]??'Progress could not be saved.':stored.status==='recoverable'?'Saved data is damaged. A previous good save is available.':issue?messages[issue]??'Progress could not be saved.':stored.status==='ready'?(stored.migrated?'An older save is ready to upgrade when you continue.':'Progress saved on this device.'):'Progress will be saved on this device when you play.');
+ el<HTMLButtonElement>('continue').hidden=stored.status!=='ready';
+ el<HTMLButtonElement>('save-progress').hidden=!maySave||showingReplay;
+ el<HTMLButtonElement>('save-retry').hidden=!writeIssue&&!(stored.status==='error'&&stored.reason==='unavailable');
+ el<HTMLButtonElement>('save-backup').hidden=stored.status!=='recoverable';
+ el<HTMLButtonElement>('save-download').hidden=progress.exportRaw()===null;
+ el<HTMLButtonElement>('save-reset').hidden=progress.exportRaw()===null;
+ el<HTMLButtonElement>('save-reload').hidden=issue!=='conflict';
+ el('progress-panel').dataset.status=issue??stored.status;
+}
+function persistProgress(){
+ if(!maySave||showingReplay)return;if(needsStoredChoice){refreshPersistence();return;}
+ lastAttemptedMoves=host.inspect().state.moves;
+ const result=progress.save({checkpoint:host.exportCheckpoint()});
+ if(result.status==='saved'){stored=progress.load();writeIssue=undefined;}else if(result.status==='error')writeIssue=result.reason;
+ refreshPersistence();
+}
+function continueRun(){
+ if(stored.status!=='ready')return;const value=stored.value;maySave=false;needsStoredChoice=false;stopPlayback();pauseDialog.close();delete board.dataset.replayVerified;
+ host.restoreCheckpoint(value.checkpoint);host.command({type:'pause',reason:'replay',paused:false});recording=undefined;screens!.show('play');pause.disabled=false;
+ if(!value.checkpoint.started)host.command({type:'start'});
+ if(host.inspect().state.won)screens!.show('result');else board.focus();
+ maySave=true;lastAttemptedMoves=-1;persistProgress();text('message','Your saved circuit is ready. Continue your route.');
+}
+el('continue').addEventListener('click',continueRun,{signal:lifetime.signal});
+el('save-progress').addEventListener('click',persistProgress,{signal:lifetime.signal});
+el('save-retry').addEventListener('click',()=>{if(stored.status==='error'&&stored.reason==='unavailable'){stored=progress.load();writeIssue=undefined;if(stored.status!=='empty'){if(stored.status==='ready'){needsStoredChoice=true;writeIssue='conflict';}refreshPersistence();return;}}persistProgress();refreshPersistence();},{signal:lifetime.signal});
+el('save-reload').addEventListener('click',()=>location.reload(),{signal:lifetime.signal});
+el('save-backup').addEventListener('click',()=>{const result=progress.recoverBackup();if(result.status==='saved'){stored=progress.load();writeIssue=undefined;}else if(result.status==='error')writeIssue=result.reason;refreshPersistence();},{signal:lifetime.signal});
+el('save-download').addEventListener('click',()=>{const raw=progress.exportRaw();if(raw===null)return;const url=URL.createObjectURL(new Blob([raw],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='__PROJECT_ID__-stored-progress.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),0);},{signal:lifetime.signal});
+const resetDialog=mountDialog(el<HTMLDialogElement>('reset-progress-dialog'),{focus:el('cancel-reset'),changed:open=>host.command({type:'pause',reason:'save-dialog',paused:open})});
+el('save-reset').addEventListener('click',()=>resetDialog.open(),{signal:lifetime.signal});el('cancel-reset').addEventListener('click',()=>resetDialog.close(),{signal:lifetime.signal});
+el('confirm-reset').addEventListener('click',()=>{const result=progress.reset();if(result.status==='reset'){maySave=false;stored={status:'empty'};writeIssue=undefined;lastAttemptedMoves=-1;resetDialog.close();screens!.show('menu');}else if(result.status==='error'){writeIssue=result.reason;resetDialog.close();}refreshPersistence();},{signal:lifetime.signal});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)persistProgress();},{signal:lifetime.signal});
+refreshPersistence();
+window.addEventListener('pagehide',()=>{persistProgress();lifetime.abort();screens?.dispose();resetDialog.dispose();pauseDialog.dispose();stopPlayback();host.dispose();},{once:true});

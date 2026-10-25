@@ -6,13 +6,15 @@ import {spawnSync} from 'node:child_process';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {createSession} from '@thedivineparadox/game-engine/runtime';
+import {createSession,createSaveSlot,restoreSession} from '@thedivineparadox/game-engine/runtime';
+import {createBrowserSaveSlot} from '@thedivineparadox/game-engine/runtime/browser/save';
 import {createGame,startPreview,testGames} from '@thedivineparadox/game-engine/tools';
 import {mountScreens,mountDialog} from '@thedivineparadox/game-engine/runtime/browser/ui';
 import {assetBriefTemplate,reviewAssetBrief} from '@thedivineparadox/game-engine/tools/asset-production';
 test('compiled public entries and shipped templates resolve without consumer source paths',()=>{
  assert.equal(typeof createSession,'function');assert.equal(typeof createGame,'function');assert.equal(typeof startPreview,'function');assert.equal(typeof testGames,'function');
  assert.equal(typeof mountScreens,'function');assert.equal(typeof mountDialog,'function');
+ assert.equal(typeof createSaveSlot,'function');assert.equal(typeof createBrowserSaveSlot,'function');assert.equal(typeof restoreSession,'function');
  const require=createRequire(import.meta.url),root=new URL('../',import.meta.url);
  assert.ok(require.resolve('@thedivineparadox/game-engine/runtime'));
  assert.ok(existsSync(new URL('dist/runtime/react/game-surface.css',root)));
