@@ -24,7 +24,7 @@ GitHub: https://github.com/tac0de/gyeol-engine
 
 ## 빌드·설치
 
-Node 24.2+에서 `npm ci`, `npm run check`, `npm pack --pack-destination /absolute/output`을 실행합니다. `dist/`의 ESM JavaScript·타입 선언·CSS, 템플릿·AGENTS·제작 문서를 설치 파일에 포함합니다. 소비 프로젝트에서 `npm install /absolute/output/thedivineparadox-game-engine-0.4.0.tgz`로 설치합니다. npm registry 공개는 하지 않습니다. 소비자의 Node 요구사항이 더 높으면 그 요구사항을 따릅니다.
+Node 24.2+에서 `npm ci`, `npm run check`, `npm pack --pack-destination /absolute/output`을 실행합니다. `dist/`의 ESM JavaScript·타입 선언·CSS, 템플릿·AGENTS·제작 문서를 설치 파일에 포함합니다. 소비 프로젝트에서 `npm install /absolute/output/thedivineparadox-game-engine-0.4.1.tgz`로 설치합니다. npm registry 공개는 하지 않습니다. 소비자의 Node 요구사항이 더 높으면 그 요구사항을 따릅니다.
 
 엔진 변경은 버전을 올리고 새 설치 파일을 만든 뒤 소비 프로젝트의 lockfile과 함께 검토합니다. 기존 설치 파일을 같은 버전으로 교체하지 않습니다. `npm run check`는 runtime 회귀·공개 export·오프라인 별도 프로젝트 설치를 검사합니다. 현재 게임 5개의 실제 UI/CLI 호환성은 소비 프로젝트의 `npm run check`로 확인합니다.
 
@@ -85,3 +85,9 @@ Canvas2D는 제공하는 기본 표현 어댑터일 뿐입니다. core는 DOM �
 trace는 최대 16MiB·14,000지점, 기본 3,600진행 step이며 core의 기존 JSON/recording 한도를 늘리지 않습니다. 전체 advance 실패 시 실제 rollback과 진단용 한 tick씩의 prefix를 구분합니다. 두 revision 비교는 최초 불일치 tick/필드만 진단하고, 다른 source를 같은 코드인 것처럼 재생하지 않습니다. 파일 목록은 신뢰된 프로젝트 어댑터가 선언하며 자동 dependency discovery·서명·권한 검사가 아닙니다.
 
 `runExperiment`는 실제 rules와 신뢰된 TypeScript 정책을 matched seeds·지연된 관찰·행동 주기·tick/전체/wall-time 한도에서 실행합니다. 실패/한도/분포와 개별 raw recording을 보존합니다. 동기 policy는 내부 timer로 선점할 수 없으므로 기존 외부 명령 timeout도 사용합니다. 정책은 사람의 실력 집단이 아니며 win rate·가상 시간·elapsed를 재미나 실제 기기 지연으로 해석하지 않습니다. 계정/인증/공개 debug API·모델 호출은 추가하지 않습니다.
+
+## License
+
+Gyeol Engine source code, documentation, and shipped templates are available under the [MIT License](LICENSE). Commercial use and proprietary games are permitted. Preserve the copyright and license notice when redistributing the engine or substantial portions of its code.
+
+Third-party dependencies and their bundled native libraries retain their own licenses; this project does not relicense them. External artwork, audio, and individual game assets are not covered by this engine license merely because the engine uses them.
