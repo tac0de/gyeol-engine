@@ -4,13 +4,28 @@ GitHub: https://github.com/tac0de/gyeol-engine
 
 독립 TypeScript 패키지 `@thedivineparadox/game-engine`입니다. 게임 프로젝트는 빌드된 npm 설치 파일을 사용하며 이 저장소의 위치에 의존하지 않습니다. 현재 소비자는 thedivineparadox입니다.
 
+## 독립 PC용 2D 프로젝트 시작
+
+```sh
+npm ci
+npm run build
+node dist/tools/cli.js create /absolute/new-signal-garden
+cd /absolute/new-signal-garden
+npm install
+npm run dev
+```
+
+0.5.0부터 `gyeol create`가 기존 포털 없이 실행되는 작은 2D 회로 퍼즐을 생성합니다. 설치한 엔진을 `vendor/gyeol-engine.tgz`로 동봉하며 규칙·화면·검사·CLI 시나리오·UI 기록 내보내기/불러오기/리플레이가 포함됩니다. `npm run check`, `npm run scenario -- --out /absolute/run.json`, `npm run replay -- /absolute/run.json`으로 같은 규칙을 검사·재현합니다.
+
+`npm run desktop:package`와 `npm run desktop:smoke -- --report /absolute/report.json`은 현재 OS/아키텍처의 Electron 패키징과 숨김 실행을 시험합니다. 정식 배포 서명·Steam·다른 OS 검증은 포함하지 않습니다. [독립 제작 안내](docs/standalone.md)에 headless 플레이 검사·공개 API·설치 파일 검증 절차가 있습니다.
+
 ## 경계와 사용
 
 - `runtime/core`: DOM 없는 규칙·시간·시드 난수·세션·재생. Node에서도 React/Vite 없이 사용할 수 있습니다.
 - `runtime/browser/*`: 입력·프레임·이미지·음향 scope.
 - `runtime/react`: 선택적 React 19 Canvas 화면. CSS를 함께 배포합니다.
 - `tools`: 게임 생성·manifest 조회·로컬 미리보기·규칙 테스트·시나리오/재생. 미리보기는 Vite 8, 타입 검사는 TypeScript 7을 소비 프로젝트에 설치합니다. React/Vite/TypeScript는 선택적 peer이며 runtime/core에 로드되지 않습니다.
-- 게임 규칙·캐릭터/배경·미술 방향·계정/저장·공개 카탈로그는 소비 프로젝트가 소유합니다. tools의 생성물은 표준 `portal/games/<id>` 배치를 사용하며 플랫폼의 공개 승인을 수행하지 않습니다.
+- 게임 규칙·캐릭터/배경·미술 방향·계정/저장·공개 카탈로그는 소비 프로젝트가 소유합니다. 기존 `createGame`은 `portal/games/<id>`, 새 `/tools/standalone`과 `gyeol create`는 독립 프로젝트를 생성하며 플랫폼의 공개 승인을 수행하지 않습니다.
 - 에셋 생성·미술 판단은 native 에이전트가 담당합니다. 이 패키지는 모델 호출이나 자동 제작 루프를 추가하지 않습니다.
 - 이미지·애니메이션·카드/UI 프레임 제작은 [에셋 제작 진입점](docs/asset-production.md)에서 시작합니다. Codex Imagegen 원본→Aseprite 보정→TypeScript 후처리를 따르며 `/tools/asset-production`은 종류별 초안과 규격 누락 검사를 제공합니다.
 
@@ -24,7 +39,7 @@ GitHub: https://github.com/tac0de/gyeol-engine
 
 ## 빌드·설치
 
-Node 24.2+에서 `npm ci`, `npm run check`, `npm pack --pack-destination /absolute/output`을 실행합니다. `dist/`의 ESM JavaScript·타입 선언·CSS, 템플릿·AGENTS·제작 문서를 설치 파일에 포함합니다. 소비 프로젝트에서 `npm install /absolute/output/thedivineparadox-game-engine-0.4.1.tgz`로 설치합니다. npm registry 공개는 하지 않습니다. 소비자의 Node 요구사항이 더 높으면 그 요구사항을 따릅니다.
+Node 24.2+에서 `npm ci`, `npm run check`, `npm pack --pack-destination /absolute/output`을 실행합니다. `dist/`의 ESM JavaScript·타입 선언·CSS, 템플릿·AGENTS·제작 문서를 설치 파일에 포함합니다. 소비 프로젝트에서 `npm install /absolute/output/thedivineparadox-game-engine-0.5.0.tgz`로 설치합니다. npm registry 공개는 하지 않습니다. 소비자의 Node 요구사항이 더 높으면 그 요구사항을 따릅니다.
 
 엔진 변경은 버전을 올리고 새 설치 파일을 만든 뒤 소비 프로젝트의 lockfile과 함께 검토합니다. 기존 설치 파일을 같은 버전으로 교체하지 않습니다. `npm run check`는 runtime 회귀·공개 export·오프라인 별도 프로젝트 설치를 검사합니다. 현재 게임 5개의 실제 UI/CLI 호환성은 소비 프로젝트의 `npm run check`로 확인합니다.
 

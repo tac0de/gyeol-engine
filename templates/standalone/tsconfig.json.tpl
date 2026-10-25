@@ -1,0 +1,1 @@
+{"compilerOptions":{"target":"ES2022","module":"NodeNext","moduleResolution":"NodeNext","strict":true,"skipLibCheck":true,"allowImportingTsExtensions":true,"noEmit":true,"lib":["ES2022","DOM","DOM.Iterable"],"types":["node","vite/client"]},"include":["src/**/*.ts","tests/rules.test.ts","scripts/game.ts"]}

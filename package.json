@@ -1,6 +1,6 @@
 {
   "name": "@thedivineparadox/game-engine",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "private": true,
   "type": "module",
   "description": "Reusable deterministic game runtime and explicit asset authoring tools",
@@ -10,6 +10,7 @@
     "README.md",
     "docs/visual-production.md",
     "docs/asset-production.md",
+    "docs/standalone.md",
     "AGENTS.md",
     "LICENSE"
   ],
@@ -70,7 +71,8 @@
       "types": "./dist/tools/visual.d.ts",
       "import": "./dist/tools/visual.js",
       "default": "./dist/tools/visual.js"
-    }
+    },
+    "./tools/standalone": {"types":"./dist/tools/standalone.d.ts","import":"./dist/tools/standalone.js","default":"./dist/tools/standalone.js"}
   },
   "sideEffects": [
     "**/*.css"
@@ -78,12 +80,14 @@
   "engines": {
     "node": ">=24.2.0"
   },
+  "bin": {"gyeol":"dist/tools/cli.js"},
   "scripts": {
     "build": "node scripts/build.ts",
-    "test": "node --test tests/runtime/*.test.ts tests/package.test.ts tests/visual.test.ts tests/asset-production.test.ts tests/reproduction.test.ts tests/experiments.test.ts",
+    "test": "node --test tests/runtime/*.test.ts tests/package.test.ts tests/visual.test.ts tests/asset-production.test.ts tests/reproduction.test.ts tests/experiments.test.ts tests/standalone.test.ts",
     "check": "npm run build && npm test",
     "prepack": "npm run build",
-    "test:visual-native": "node --test tests/visual-native.test.ts"
+    "test:visual-native": "node --test tests/visual-native.test.ts",
+    "test:standalone": "node tests/standalone.integration.ts"
   },
   "peerDependencies": {
     "react": "^19.0.0",
