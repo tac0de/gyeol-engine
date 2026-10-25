@@ -14,9 +14,10 @@
     "scenario": "node scripts/game.ts scenario",
     "replay": "node scripts/game.ts replay",
     "check:browser": "node tests/browser.ts",
+    "desktop:setup": "node scripts/desktop.ts setup",
     "desktop:package": "npm run build && node scripts/desktop.ts package",
     "desktop:smoke": "node scripts/desktop.ts smoke"
   },
   "dependencies": {"@thedivineparadox/game-engine": "file:vendor/gyeol-engine.tgz"},
-  "devDependencies": {"vite": "8.3.4", "typescript": "7.0.2", "@types/node": "26.6.5", "playwright": "1.64.1", "electron": "45.0.0", "@electron/packager": "20.3.0"}
+  "devDependencies": {"vite": "8.3.4", "typescript": "7.0.2", "@types/node": "26.6.5", "playwright": "1.64.1"}
 }

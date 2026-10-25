@@ -1,0 +1,12 @@
+/* Opt-in structural UI. Game art, colors, and screen policy belong to the consumer. */
+.gyeol-stack{display:flex;flex-direction:column;gap:var(--gyeol-gap,1rem);min-width:0}
+.gyeol-row{display:flex;align-items:center;flex-wrap:wrap;gap:var(--gyeol-gap,.75rem);min-width:0}
+.gyeol-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,var(--gyeol-column,14rem)),1fr));gap:var(--gyeol-gap,1rem);min-width:0}
+.gyeol-panel{padding:var(--gyeol-panel-padding,clamp(1rem,3vw,2rem));min-width:0;overflow-wrap:anywhere}
+.gyeol-action{min-height:44px;min-width:44px;font:inherit;cursor:pointer;white-space:normal;overflow-wrap:anywhere}
+.gyeol-action:disabled{cursor:default}
+.gyeol-action:focus-visible{outline:2px solid var(--gyeol-focus,currentColor);outline-offset:3px}
+.gyeol-dialog{max-width:min(30rem,calc(100vw - 2rem));max-height:calc(100dvh - 2rem);overflow:auto;overflow-wrap:anywhere}
+.gyeol-dialog::backdrop{background:rgb(0 0 0 / .65)}
+.gyeol-dialog:not([open]){display:none}
+[data-gyeol-screen][hidden]{display:none!important}

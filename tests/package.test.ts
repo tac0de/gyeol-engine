@@ -8,12 +8,15 @@ import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createSession} from '@thedivineparadox/game-engine/runtime';
 import {createGame,startPreview,testGames} from '@thedivineparadox/game-engine/tools';
+import {mountScreens,mountDialog} from '@thedivineparadox/game-engine/runtime/browser/ui';
 import {assetBriefTemplate,reviewAssetBrief} from '@thedivineparadox/game-engine/tools/asset-production';
 test('compiled public entries and shipped templates resolve without consumer source paths',()=>{
  assert.equal(typeof createSession,'function');assert.equal(typeof createGame,'function');assert.equal(typeof startPreview,'function');assert.equal(typeof testGames,'function');
+ assert.equal(typeof mountScreens,'function');assert.equal(typeof mountDialog,'function');
  const require=createRequire(import.meta.url),root=new URL('../',import.meta.url);
  assert.ok(require.resolve('@thedivineparadox/game-engine/runtime'));
  assert.ok(existsSync(new URL('dist/runtime/react/game-surface.css',root)));
+ assert.ok(existsSync(new URL('dist/runtime/browser/ui.css',root)));
  assert.ok(existsSync(new URL('AGENTS.md',root)));assert.ok(existsSync(new URL('docs/asset-production.md',root)));
  assert.equal(reviewAssetBrief(assetBriefTemplate('ui-frame')).status,'incomplete');
  const source=readFileSync(new URL('dist/tools/game.js',root),'utf8');

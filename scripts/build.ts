@@ -9,3 +9,5 @@ if(result.error)throw result.error;
 if(result.status!==0)process.exit(result.status??1);
 mkdirSync(new URL('../dist/runtime/react/',import.meta.url),{recursive:true});
 cpSync(new URL('../runtime/react/game-surface.css',import.meta.url),new URL('../dist/runtime/react/game-surface.css',import.meta.url));
+mkdirSync(new URL('../dist/runtime/browser/',import.meta.url),{recursive:true});
+cpSync(new URL('../runtime/browser/ui.css',import.meta.url),new URL('../dist/runtime/browser/ui.css',import.meta.url));

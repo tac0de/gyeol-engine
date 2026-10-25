@@ -23,9 +23,9 @@ app.whenReady().then(async()=>{
   if(!report||!isAbsolute(report))throw Error('Absolute GYEOL_SMOKE_REPORT required');
   const route=JSON.parse(process.env.GYEOL_SMOKE_ROUTE??'null');if(!Array.isArray(route)||route.length>256||route.some(x=>!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(x)))throw Error('Invalid smoke route');
   const result=await window.webContents.executeJavaScript(`(async()=>{
-   const board=document.querySelector('#board');document.querySelector('#start').click();
+   const board=document.querySelector('#board'),start=document.querySelector('#start');if(!start.checkVisibility())throw Error('Start control is not visible');start.click();
    for(const key of ${JSON.stringify(route)}){board.dispatchEvent(new KeyboardEvent('keydown',{key,bubbles:true}));board.dispatchEvent(new KeyboardEvent('keyup',{key,bubbles:true}));}
-   const won=board.dataset.won==='true';document.querySelector('#replay').click();
+   const won=board.dataset.won==='true',play=document.querySelector('#result-replay');if(!play.checkVisibility()||play.disabled)throw Error('Result replay control is not actionable');play.click();
    const until=Date.now()+15000;while(board.dataset.replayVerified!=='true'&&Date.now()<until)await new Promise(r=>setTimeout(r,50));
    return {won,replayVerified:board.dataset.replayVerified==='true',nodeExposed:typeof window.require!=='undefined'||typeof window.process!=='undefined',title:document.title,overflow:document.documentElement.scrollWidth>innerWidth};
   })()`);

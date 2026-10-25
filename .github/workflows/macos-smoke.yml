@@ -24,7 +24,7 @@ jobs:
       - name: Build and check engine
         run: npm run check
       - name: Generate, play, replay, package, and run the actual Mac app
-        run: node tests/standalone.integration.ts --evidence-dir "$RUNNER_TEMP/gyeol-evidence"
+        run: node tests/standalone.integration.ts --evidence-dir "$RUNNER_TEMP/gyeol-evidence" --desktop
       - name: Preserve reports, screenshots, and bounded command logs
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

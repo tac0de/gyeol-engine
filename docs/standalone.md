@@ -1,6 +1,6 @@
-# Standalone PC 2D authoring
+# Standalone web 2D authoring
 
-Node 24.2+; current engine package version 0.5.1. From a built checkout:
+Gyeol Engine 0.6.0 targets agent-assisted web 2D game development. Desktop packaging is optional. Node 24.2+ is needed for development.
 
 ```sh
 npm ci
@@ -11,38 +11,37 @@ npm install
 npm run dev
 ```
 
-From an engine tarball, `npm exec --package=/absolute/engine.tgz -- gyeol create /absolute/new-signal-garden` exposes the same installed CLI. No npm registry release is assumed. Creation does not install dependencies or start anything. The parent must exist, the destination must be new, its basename must be a lowercase project id, and symlink paths are rejected. Existing files/directories are never adopted. `--title TITLE` sets a safely escaped display title.
+From an engine tarball, `npm exec --package=/absolute/engine.tgz -- gyeol create /absolute/new-signal-garden` exposes the same installed CLI. No npm registry release is assumed. Creation does not install tools or start a server. The parent must exist, the destination must be new, its basename must be a lowercase project id, and symlink paths are rejected. `--title TITLE` sets a safely escaped display title.
 
-The new project contains its own engine tarball, source, deterministic circuit puzzle, real browser input, tests, CLI inspect/scenario/replay commands, UI JSON export/import/playback, and an optional host-native Electron packaging command. The generated README lists exact commands. Core/browser imports come only from the installed public engine package; there is no consumer checkout path, Next portal, React wrapper, account, database, or kernel dependency. Vite/TypeScript/Playwright/Electron are development dependencies of the new project, not runtime dependencies of the engine.
+The project contains its own engine tarball, rules/presentation source, menu/play/results and pause dialog, UI JSON export/import/replay, tests, and CLI inspect/scenario/replay. There is no portal, React, account, database, personal kernel, or proprietary generation requirement. Web development dependencies include Vite, TypeScript, and Playwright; Electron/packager are absent from a normal install. The old portal `createGame` API remains available for existing consumers. See [UI API](ui.md) and [public beta scope](roadmap.md).
 
-`src/rules.ts` owns the example's game rules. `src/main.ts` delegates session/input/lifecycle to existing engine APIs. The circuit's Canvas geometry is the actual puzzle UI, not a production character-art pipeline. The old `createGame` portal API remains compatible for existing consumers. Independent games use `createStandaloneProject` from `/tools/standalone`, which loads no Vite/React peer just to create a directory.
-
-## Verification
-
-`npm run check` in this repository verifies engine regressions and standalone generator boundaries, plus offline runtime-only installation and game/replay tests. Full acceptance is explicit because it installs a fresh project toolchain and packages a host executable:
+## Verify the web loop
 
 ```sh
-node tests/standalone.integration.ts --evidence-dir /absolute/new-private-directory
+npm run check
+node tests/standalone.integration.ts --evidence-dir /absolute/private-evidence
 ```
 
-This packs the engine, installs only that tarball into an unrelated bootstrap, invokes its actual `gyeol` bin, installs the generated project's tools, checks/builds/plays it headlessly, exports/imports/replays a trail, and packages/launches a hidden host-native app. Logs, recordings, reports, screenshots, and executable output stay under the supplied external evidence directory. No user browser profile, headed browser, host input, sandbox-disable flag, or public upload is involved in this command.
+Repository checks verify engine regressions and generator boundaries. Full web integration packs the engine, installs its actual `gyeol` bin into an unrelated bootstrap, creates a fresh project, verifies Electron is absent, builds/tests it, and exercises the visible menu/play/results/pause flow, focus, lifecycle, keyboard/pointer, export/import/replay and responsive layout in headless Chromium. Reports/screenshots/logs stay outside source. Inspect screenshots; passing tests do not establish fun or art quality. Other browsers/devices remain separate verification until the support matrix is established.
 
-A successful host-native package smoke establishes bundled local loading, actual example actions/replay, and the checked renderer isolation settings. It does not establish signing, notarization, Steam integration, other OS support, human fun, or long-term saves. Replay identifies game/rule version but is not a source-bound authenticated reproduction; the existing reproduction tools remain available for that separate use.
+## Optional desktop feasibility host
 
-On the 2026-10-25 protected macOS arm64 development host, real headless browser play/export/import/replay passed and the Electron 45.0.0 `.app` package was produced. Packaged execution was blocked before game loading by `sandbox initialization failed: Operation not permitted`. The OS guard and Electron sandbox were preserved; packaged gameplay remains unverified on that host. Integration keeps this failure nonzero and records the partial browser/package evidence instead of treating it as a successful smoke. Run the same `desktop:smoke` command in a compatible normal development environment to resolve that remaining check.
+In a generated game:
 
-For that known incompatible host, explicitly append `--package-only` to the integration command to check generation, browser play, replay, packaging, and archive contents without retrying the blocked launch. Its result says `desktopExecution: not_run`; it is not the full desktop acceptance check.
+```sh
+npm run desktop:setup
+npm run desktop:package
+npm run desktop:smoke -- --report /absolute/new-desktop-report.json
+```
 
-### Protected-host compatibility validation
+`desktop:setup` explicitly adds pinned Electron/packager development dependencies and updates that game's manifest/lockfile. It is not run by `create`, ordinary `npm install`, or web checks. It downloads the optional tools and Electron binary. Packaging targets the current host and bundles local runtime/assets; it does not sign, notarize, install, or integrate Steam.
 
-The manual **Standalone macOS smoke** GitHub Actions workflow runs the full integration command on a fresh standard `macos-15` arm64 VM. It checks out only this public repository: no developer home directory, local `.local` data, credentials, or existing browser profile is uploaded or mounted. The local OS write guard remains unchanged. The generated Electron app still calls `app.enableSandbox()` and keeps `sandbox: true`, `contextIsolation: true`, and `nodeIntegration: false`; no sandbox-disable flag is added.
+The smoke launches a packaged app with its window hidden, completes the visible menu/game/results path, replays the route, checks sandbox/context isolation/Node non-exposure, captures a screenshot/report, and exits. It does not substitute for human UI testing or certify other platforms.
 
-Run this workflow explicitly from the Actions tab, or with `gh workflow run macos-smoke.yml --ref main`. It has no push, pull-request, or scheduled trigger. Official actions are pinned to commit SHAs, the workflow token has only `contents: read`, and checkout credentials are not persisted. Reports, screenshots, and command logs are retained for seven days; application binaries and dependency trees are not uploaded.
+To test the optional path from this repository, append `--desktop` to integration. `--package-only` keeps the earlier explicit desktop-package-without-launch check. Default integration is web-only.
 
-A passing run must include `desktop.status: passed`, `packaged: true`, `won: true`, `replayVerified: true`, `sandbox: true`, `contextIsolation: true`, `nodeIntegration: false`, and `nodeExposed: false` in `acceptance.json`. Review `desktop-smoke.json.png` as well as the run status. This proves execution on that separate Mac VM, not compatibility with the original nested local sandbox or release signing/notarization. Desktop remains an optional host for this browser-based runtime, not a prerequisite for making or testing web games.
+The protected local macOS shell cannot initialize nested Electron sandboxes. Do not lower the OS guard, use unconfined tools to bypass it, or disable Electron isolation. The manual **Standalone macOS smoke** workflow uses a separate standard `macos-15` arm64 VM with only this public repository checked out. No developer home, local `.local`, credentials, or user browser profile is uploaded/mounted. It is manual-only, with read-only repository permission, SHA-pinned official actions, and seven-day report/screenshot/log retention. App binaries/dependency trees are not uploaded.
 
-## Packaging decisions
+`gh workflow run macos-smoke.yml --ref main` requests that optional check. A pass requires actual `desktop.status: passed`, `packaged/won/replayVerified/sandbox/contextIsolation: true`, and `nodeIntegration/nodeExposed: false`. Inspect the app screenshot and exact run SHA. This establishes execution on that VM, not compatibility with the original nested sandbox or a signed release. The 0.5.1 workflow established this compatible path; UI changes must be checked again before claiming its current behavior.
 
-Electron is a small-scope feasibility host here, not a mandatory engine dependency or a final choice for every game. The sample keeps sandbox/context isolation enabled, exposes no preload/Node bridge, loads only bundled files, blocks other file paths and remote requests, and denies permissions/navigation/new windows. Generated app names are sanitized separately from arbitrary display titles. Final distribution requires current dependencies and platform-specific release work.
-
-References: [Electron application packaging](https://www.electronjs.org/docs/latest/tutorial/application-distribution), [Electron security](https://www.electronjs.org/docs/latest/tutorial/security), [Vite build](https://vite.dev/guide/build), [Playwright browser automation](https://playwright.dev/docs/api/class-browsertype#browser-type-launch).
+References: [Electron sandbox](https://www.electronjs.org/docs/latest/tutorial/sandbox), [Electron packaging](https://www.electronjs.org/docs/latest/tutorial/application-distribution), [GitHub runner isolation](https://docs.github.com/en/actions/how-tos/write-workflows/choose-where-workflows-run/choose-the-runner-for-a-job).

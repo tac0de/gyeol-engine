@@ -8,6 +8,7 @@ test('standalone generator ships a self-contained engine and safely escapes titl
   const target=join(root,'signal-garden');const result=await createStandaloneProject(target,{title:'A <signal> & "garden" __PROJECT_ID__'});
   assert.equal(result.project,target);const pkg=JSON.parse(await readFile(join(target,'package.json'),'utf8'));
   assert.equal(pkg.dependencies['@thedivineparadox/game-engine'],'file:vendor/gyeol-engine.tgz');
+  assert.equal(pkg.devDependencies.electron,undefined);assert.equal(pkg.devDependencies['@electron/packager'],undefined);assert.match(pkg.scripts['desktop:setup'],/desktop.ts setup/);
   assert.match(await readFile(join(target,'index.html'),'utf8'),/A &lt;signal&gt; &amp; &quot;garden&quot; __PROJECT_ID__/);
   const main=await readFile(join(target,'desktop/main.ts'),'utf8');assert.ok(main.includes('title:'+JSON.stringify('A <signal> & "garden" __PROJECT_ID__')));
   // The fast check proves runtime-only offline use; full toolchain install is the explicit integration lane.

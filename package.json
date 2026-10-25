@@ -1,6 +1,6 @@
 {
   "name": "@thedivineparadox/game-engine",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "private": true,
   "type": "module",
   "description": "Reusable deterministic game runtime and explicit asset authoring tools",
@@ -11,6 +11,8 @@
     "docs/visual-production.md",
     "docs/asset-production.md",
     "docs/standalone.md",
+    "docs/ui.md",
+    "docs/roadmap.md",
     "AGENTS.md",
     "LICENSE"
   ],
@@ -72,7 +74,9 @@
       "import": "./dist/tools/visual.js",
       "default": "./dist/tools/visual.js"
     },
-    "./tools/standalone": {"types":"./dist/tools/standalone.d.ts","import":"./dist/tools/standalone.js","default":"./dist/tools/standalone.js"}
+    "./tools/standalone": {"types":"./dist/tools/standalone.d.ts","import":"./dist/tools/standalone.js","default":"./dist/tools/standalone.js"},
+    "./runtime/browser/ui": {"types":"./dist/runtime/browser/ui.d.ts","import":"./dist/runtime/browser/ui.js","default":"./dist/runtime/browser/ui.js"},
+    "./runtime/browser/ui.css":"./dist/runtime/browser/ui.css"
   },
   "sideEffects": [
     "**/*.css"

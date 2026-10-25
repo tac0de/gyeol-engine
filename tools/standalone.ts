@@ -40,6 +40,6 @@ export async function createStandaloneProject(destination:string,options:{title?
   await copyFile(join(target,'vendor',filename),join(target,'vendor/gyeol-engine.tgz'));
   await rm(join(target,'vendor',filename));
   await copyFile(join(packageRoot,'LICENSE'),join(target,'LICENSE'));
-  return {project:target,id,engine:'vendor/gyeol-engine.tgz',next:['npm install','npm run dev','npm run check','npm run scenario -- --out /absolute/run.json','npm run replay -- /absolute/run.json','npm run check:browser -- --evidence-dir /absolute/evidence','npm run desktop:package']};
+  return {project:target,id,engine:'vendor/gyeol-engine.tgz',next:['npm install','npm run dev','npm run check','npm run scenario -- --out /absolute/run.json','npm run replay -- /absolute/run.json','npm run check:browser -- --evidence-dir /absolute/evidence'],optionalDesktop:['npm run desktop:setup','npm run desktop:package']};
  }catch(error){await rm(target,{recursive:true,force:true});throw error;}
 }
