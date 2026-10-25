@@ -1,4 +1,6 @@
-# Paradox game engine
+# 결 엔진 (Gyeol Engine)
+
+GitHub: https://github.com/tac0de/gyeol-engine
 
 독립 TypeScript 패키지 `@thedivineparadox/game-engine`입니다. 게임 프로젝트는 빌드된 npm 설치 파일을 사용하며 이 저장소의 위치에 의존하지 않습니다. 현재 소비자는 thedivineparadox입니다.
 
