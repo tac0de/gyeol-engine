@@ -8,13 +8,15 @@ if(smoke&&process.platform==='darwin')app.setActivationPolicy('prohibited');
 const inside=(path:string)=>{const r=relative(root,path);return r===''||(!r.startsWith('..')&&!isAbsolute(r));};
 app.enableSandbox();
 app.whenReady().then(async()=>{
- session.defaultSession.setPermissionRequestHandler((_wc,_permission,callback)=>callback(false));
- session.defaultSession.setPermissionCheckHandler(()=>false);
- session.defaultSession.webRequest.onBeforeRequest((details,callback)=>{
+ // Smoke runs must never read or mutate a player's persistent application data.
+ const contentSession=smoke?session.fromPartition('gyeol-smoke-'+process.pid):session.defaultSession;
+ contentSession.setPermissionRequestHandler((_wc,_permission,callback)=>callback(false));
+ contentSession.setPermissionCheckHandler(()=>false);
+ contentSession.webRequest.onBeforeRequest((details,callback)=>{
   let allowed=false;try{allowed=details.url.startsWith('file:')&&inside(fileURLToPath(details.url));}catch{/* Deny malformed or remote URLs. */}
   callback({cancel:!allowed});
  });
- window=new BrowserWindow({title:__TITLE_JSON__,width:1120,height:850,minWidth:640,minHeight:680,show:!smoke,backgroundColor:'#111a1a',webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true,backgroundThrottling:false}});
+ window=new BrowserWindow({title:__TITLE_JSON__,width:1120,height:850,minWidth:640,minHeight:680,show:!smoke,backgroundColor:'#111a1a',webPreferences:{session:contentSession,nodeIntegration:false,contextIsolation:true,sandbox:true,backgroundThrottling:false}});
  window.removeMenu();window.webContents.setWindowOpenHandler(()=>({action:'deny'}));
  window.webContents.on('will-navigate',event=>event.preventDefault());
  window.webContents.on('will-attach-webview',event=>event.preventDefault());
@@ -30,9 +32,10 @@ app.whenReady().then(async()=>{
    return {won,replayVerified:board.dataset.replayVerified==='true',nodeExposed:typeof window.require!=='undefined'||typeof window.process!=='undefined',title:document.title,overflow:document.documentElement.scrollWidth>innerWidth};
   })()`);
   const prefs=window.webContents.getLastWebPreferences();
-  const output={...result,packaged:app.isPackaged,appPath:app.getAppPath(),sandbox:prefs.sandbox,contextIsolation:prefs.contextIsolation,nodeIntegration:prefs.nodeIntegration};
+  const isolatedSession=!contentSession.isPersistent();
+  const output={...result,isolatedSession,packaged:app.isPackaged,appPath:app.getAppPath(),sandbox:prefs.sandbox,contextIsolation:prefs.contextIsolation,nodeIntegration:prefs.nodeIntegration};
   writeFileSync(report,JSON.stringify(output,null,2),{flag:'wx'});writeFileSync(report+'.png',(await window.webContents.capturePage()).toPNG(),{flag:'wx'});
-  app.exit(result.won&&result.replayVerified&&!result.nodeExposed&&!result.overflow&&prefs.sandbox&&prefs.contextIsolation&&!prefs.nodeIntegration?0:1);
+  app.exit(isolatedSession&&result.won&&result.replayVerified&&!result.nodeExposed&&!result.overflow&&prefs.sandbox&&prefs.contextIsolation&&!prefs.nodeIntegration?0:1);
  }
 }).catch(error=>{console.error(error);app.exit(1);});
 app.on('window-all-closed',()=>app.quit());

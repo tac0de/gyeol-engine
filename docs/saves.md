@@ -63,3 +63,5 @@ The test uses its own temporary persistent Chromium profile, actually closes the
 Local storage belongs to an origin (scheme/host/port) and can be cleared or evicted by the browser. Private mode has different lifetime rules; `file:` storage is not portable. This release does not promise cloud sync, encryption, multi-tab serialization, hardware power-loss durability, or guaranteed storage retention.
 
 References: [WHATWG Web Storage](https://html.spec.whatwg.org/multipage/webstorage.html), [localStorage behavior](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage), [quota/error behavior](https://developer.mozilla.org/en-US/docs/Web/API/Storage_API/Storage_quotas_and_eviction_criteria).
+
+The optional packaged-app smoke check uses an in-memory Electron session, applies the same permissions/network restrictions, and asserts that it is non-persistent. It never reads or writes the normal application’s saved progress.

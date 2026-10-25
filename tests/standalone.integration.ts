@@ -49,7 +49,7 @@ try{
  if(packageOnly){acceptance.desktop={status:'not_run',verified:false,reason:'Explicit --package-only; packaged execution remains a separate check.'};}
  else{
  run(project,['npm','run','desktop:smoke','--','--report',join(evidence,'desktop-smoke.json')],90000);
- const desktop=JSON.parse(await readFile(join(evidence,'desktop-smoke.json'),'utf8'));assert.equal(desktop.packaged,true);assert.equal(desktop.replayVerified,true);acceptance.desktop={status:'passed',...desktop};
+ const desktop=JSON.parse(await readFile(join(evidence,'desktop-smoke.json'),'utf8'));assert.equal(desktop.isolatedSession,true);assert.equal(desktop.packaged,true);assert.equal(desktop.replayVerified,true);acceptance.desktop={status:'passed',...desktop};
  }
 }catch(error){
  const logName=String(sequence).padStart(2,'0')+'.log',log=await readFile(join(evidence,logName),'utf8');acceptance.desktop={status:/sandbox initialization failed: Operation not permitted/.test(log)?'blocked_by_host_sandbox':'failed',verified:false,log:logName};
