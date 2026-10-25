@@ -1,6 +1,6 @@
 # Standalone PC 2D authoring
 
-Node 24.2+; current engine package version 0.5.0. From a built checkout:
+Node 24.2+; current engine package version 0.5.1. From a built checkout:
 
 ```sh
 npm ci
@@ -32,6 +32,14 @@ A successful host-native package smoke establishes bundled local loading, actual
 On the 2026-10-25 protected macOS arm64 development host, real headless browser play/export/import/replay passed and the Electron 45.0.0 `.app` package was produced. Packaged execution was blocked before game loading by `sandbox initialization failed: Operation not permitted`. The OS guard and Electron sandbox were preserved; packaged gameplay remains unverified on that host. Integration keeps this failure nonzero and records the partial browser/package evidence instead of treating it as a successful smoke. Run the same `desktop:smoke` command in a compatible normal development environment to resolve that remaining check.
 
 For that known incompatible host, explicitly append `--package-only` to the integration command to check generation, browser play, replay, packaging, and archive contents without retrying the blocked launch. Its result says `desktopExecution: not_run`; it is not the full desktop acceptance check.
+
+### Protected-host compatibility validation
+
+The manual **Standalone macOS smoke** GitHub Actions workflow runs the full integration command on a fresh standard `macos-15` arm64 VM. It checks out only this public repository: no developer home directory, local `.local` data, credentials, or existing browser profile is uploaded or mounted. The local OS write guard remains unchanged. The generated Electron app still calls `app.enableSandbox()` and keeps `sandbox: true`, `contextIsolation: true`, and `nodeIntegration: false`; no sandbox-disable flag is added.
+
+Run this workflow explicitly from the Actions tab, or with `gh workflow run macos-smoke.yml --ref main`. It has no push, pull-request, or scheduled trigger. Official actions are pinned to commit SHAs, the workflow token has only `contents: read`, and checkout credentials are not persisted. Reports, screenshots, and command logs are retained for seven days; application binaries and dependency trees are not uploaded.
+
+A passing run must include `desktop.status: passed`, `packaged: true`, `won: true`, `replayVerified: true`, `sandbox: true`, `contextIsolation: true`, `nodeIntegration: false`, and `nodeExposed: false` in `acceptance.json`. Review `desktop-smoke.json.png` as well as the run status. This proves execution on that separate Mac VM, not compatibility with the original nested local sandbox or release signing/notarization. Desktop remains an optional host for this browser-based runtime, not a prerequisite for making or testing web games.
 
 ## Packaging decisions
 

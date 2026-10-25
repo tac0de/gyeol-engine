@@ -1,0 +1,40 @@
+name: Standalone macOS smoke
+
+# Explicit compatibility validation, not a recurring desktop release pipeline.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  macos-smoke:
+    runs-on: macos-15
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Install engine development dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Build and check engine
+        run: npm run check
+      - name: Generate, play, replay, package, and run the actual Mac app
+        run: node tests/standalone.integration.ts --evidence-dir "$RUNNER_TEMP/gyeol-evidence"
+      - name: Preserve reports, screenshots, and bounded command logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: macos-proof-${{ github.sha }}
+          retention-days: 7
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/gyeol-evidence/**/acceptance.json
+            ${{ runner.temp }}/gyeol-evidence/**/desktop-smoke.json
+            ${{ runner.temp }}/gyeol-evidence/**/browser-result.json
+            ${{ runner.temp }}/gyeol-evidence/**/*.png
+            ${{ runner.temp }}/gyeol-evidence/**/*.log
